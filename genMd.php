@@ -20,7 +20,6 @@
     </div>
     <?php
 
-    //STEP 1 Connect To Database
     include 'config/vars.php';
     $error = '';
     $link = mysql_connect($dbserver, $username, $password);
@@ -32,59 +31,17 @@
     $select_count = mysql_numrows($select_result);
     $outfile = "input/tagfile.txt";
     $file_handle_out = fopen($outfile, "w")or die("can't open outfile");
-    //$researchfile = "output/sourcedResearch.csv";
-    //$file_handle_res = fopen($researchfile, "w")or die("can't open resfile");
-    //fwrite($file_handle_out,"workrecordid,field,value\n");
-    //fwrite($file_handle_res,"workrecordid,field,value\n");
     $p = 0;
     $collarray =array();
     $prev_id = 0;
 
     while ($p < $select_count)
     {
-        //$type = mysql_result($select_result, $p, 'type');
         $value_text = mysql_result($select_result, $p, 'value_text');
         $game = mysql_result($select_result, $p, 'game');
         $image_id = mysql_result($select_result, $p, 'image_id');
         $collection = mysql_result($select_result, $p, 'collection');
         $id = mysql_result($select_result, $p, 'id');
-        /*
-        switch ($type) {
-            case 'subject_object':
-                $subject_type = 'Subject Object';
-                break;
-            case 'subject_person':
-                $subject_type = 'Subject Person';
-                break;
-            case 'subject_event':
-                $subject_type = 'Subject Event';
-                break;
-            case 'subject_category':
-                $subject_type = 'Subject Class';
-                break;
-            case 'subject_place':
-                $subject_type = 'Subject Place';
-                break;
-            case 'subject_date':
-                $subject_type = 'Subject Date';
-                break;
-            case 'creator':
-                $subject_type = 'Creator';
-                break;
-            case 'transcription':
-                $subject_type = 'Transcription';
-                break;
-            case 'translation':
-                $subject_type = 'Translation';
-                break;
-            case 'date_research':
-                $subject_type = 'Date';
-                break;
-            case 'production':
-                $subject_type = 'Production';
-                break;
-        }
-    */
 
 
         $image_id =(substr($image_id, 0,7));
@@ -92,68 +49,12 @@
         fwrite($file_handle_out, $image_id.';'.$value_text. ';'.$collection.";\n");
 
 
-    /*
-        $subjpos = strpos($subject_type, 'ubject');
-
-        echo 'SUBJPOS'.$subjpos;
-        if ($image_id != $prev_id and $keyword != '')
-        {
-            $keywordstring = $prev_id.','.'Keyword'.',"'.$keyword."\"\n";
-            echo 'keybefore'.$keywordstring;
-            $keywordstring = str_replace(', "' ,'"', $keywordstring);
-            echo 'keyafter'.$keywordstring;
-            fwrite($file_handle_out, $keywordstring);
-            $keyword = '';
-        }
-
-        if ($subjpos !== false)
-        {
-
-            $keyword .= $value_text.', ';
-
-        }
-        else
-        {
-            fwrite($file_handle_res, $image_id.', '.$subject_type. ', "'.$value_text."\"\n");
-        }
-        echo 'IM'.$image_id.'PR'.$prev_id.'KY'.$keyword."\n";
-
-*/
-
         $sql = "UPDATE orders.CROWD set status = 'L'  where id= '".$id."';";
         $result=mysql_query($sql) or die( "A MySQL error has occurred.<br />Your Query: " . $sql . "<br /> Error: (" . mysql_errno() . ") " . mysql_error());
 
-
-
-      //  $prev_id = $image_id;
         $p++;
 
     }
-/*
-    if ($keyword != '')
-    {
-        $keywordstring = $prev_id.','.'Tag'.',"'.$keyword."\"\n";
-        $keywordstring = str_replace(', "' ,'"', $keywordstring);
-        fwrite($file_handle_out, $keywordstring);
-        $keyword = '';
-    }
-
-    echo '<div class = "die"><p>METADATA IN FILE</p></div>';
-    //construct and send e-mail to let the user know they're approved
-
-    foreach ($collarray as $item )
-    {
-        $concatenated_message .= $item."\n";
-    }
-
-
-    $whoto = "scott.renton@ed.ac.uk";
-    $email = "scott.renton@ed.ac.uk";
-    $subject = "You have new metadata for these collections";
-
-    mail( $email, $subject,$concatenated_message, "From: $whoto" );
-*/
-
 
     function ucname($string) {
         $string =ucwords(strtolower($string));
