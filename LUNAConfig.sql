@@ -24,7 +24,7 @@ set
 <p align=left>If you would like to re-use any non-CC-BY images, please contact the Centre for Research Collections (is-crc@ed.ac.uk) where staff can advise you of the copyright status. Further information can be found on our <a href = "http://www.ed.ac.uk/information-services/library-museum-gallery/crc/services/copying-and-digitisation/image-licensing"  target="_blank">Image Licensing webpages</a>.</p><p><a href = "http://www.ed.ac.uk/information-services/library-museum-gallery/crc/services/copying-and-digitisation/permission-to-reproduce-images/takedown-policy" target="_blank">Our Takedown Policy</a></p></div></font>'
 where
     COLLECTIONID = 'All Collections';
-    
+
 #######################################
 #    ALL COLLECTIONS- TEACHING
 #######################################
@@ -277,11 +277,12 @@ update EXTENDEDCOLLECTIONPROPERTIES
 set
     INTRODUCTIONTEXT = '<font size =2 ><style>#inner{margin-left:10px; max-width:750px;text-align: justify;text-justify: inter-word;}</style>
 
-        <div id="inner"><p>Incunabula, from the Latin for &#34;swaddling clothes&#34;, are books from the infancy of printing &#45; anything printed using moveable type before 1501.  These books are among the most precious items in any library and Edinburgh University is privileged to have a significant collection of nearly 300 such books.</p>
+        <div id="inner"><p>Incunabula, from the Latin for "swaddling clothes", are books from the infancy of printing - anything printed using moveable type before 1501.  These books are among the most precious items in any library and Edinburgh University is privileged to have a significant collection of nearly 300 such books.</p>
 
-        <p>These early books have been extracted from other sequences and other collections, including the libraries of Dugald Stewart and Clement Litill.  Many have numerous provenances.  There are some particularly beautiful books with hand-colouring and early bindings.  A copy of the Decretals of Gratian, printed in 1472, was reputedly the favourite printed book of its owner, William Morris (Inc.4.4).  Most of the books are continental imprints, including a copy of the first book printed at Venice in 1469.  There are, however, two papal indulgences printed by Wynkyn de Worde in 1497 and 1498, and an imperfect copy of Caxton&#39;s Polychronicon.</p>
+        <p>These early books have been extracted from other sequences and other collections, including the libraries of Dugald Stewart and Clement Litill.  Many have numerous provenances.  There are some particularly beautiful books with hand-colouring and early bindings.  A copy of the Decretals of Gratian, printed in 1472, was reputedly the favourite printed book of its owner, William Morris (Inc.4.4).  Most of the books are continental imprints, including a copy of the first book printed at Venice in 1469.  There are, however, two papal indulgences printed by Wynkyn de Worde in 1497 and 1498, and an imperfect copy of Caxton''s Polychronicon.</p>
 
-        <p>The oldest printed book in the Library is in fact a Chinese book printed in woodblock in 1440 &#45; Zhou yi zhuan yi da quan [Complete commentaries on the Yi Jing], Df.7.106.</p>
+        <p>The oldest printed book in the Library is in fact a Chinese book printed in woodblock in 1440 - Zhou yi zhuan yi da quan [Complete commentaries on the Yi Jing], Df.7.106.</p>
+<p><a href="https://librarylabs.ed.ac.uk/iiif/uv/?manifest=https://librarylabs.ed.ac.uk/iiif/speccollprototype/manifest/f948bee2.json" target ="_blank">See the Pedakiou Dioskoridou Anazarbeōs Peri hylēs iatrikēs logoi hex (CRC Inc.F.107) in Universal Viewer</a></p>
 <p align=left><a href="http://creativecommons.org/licenses/by/3.0/" target="_blank">Creative Commons Info
 <p align=left>
 <img src="https://images.is.ed.ac.uk/graphics/by-front.jpg"/></a>
