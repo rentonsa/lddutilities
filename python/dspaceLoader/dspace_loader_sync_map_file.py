@@ -28,6 +28,8 @@ environment =str(args.environment)
 print ('collection is '+ collection)
 print ('environment is ' + environment)
 
+if environment == 'live':
+    environment = ''
 
 def main():
     """

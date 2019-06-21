@@ -5,6 +5,7 @@ Generate manifest for AV
 import csv
 import json
 with open('annos-78.csv', 'r') as csvfile:
+#with open('annos.csv', 'r') as csvfile:
     anno_reader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
     anno_array = list(anno_reader)
 anno_len = len(anno_array)
@@ -61,7 +62,8 @@ def control():
         "type": "Canvas",
         "width": 1200,
         "height": 1200,
-        "duration": 194,
+        "duration": 208,
+        #"duration": 311,
         "content": content_array
     })
 
@@ -78,11 +80,13 @@ def control():
         "type": "Manifest",
         "logo" : "https://images.is.ed.ac.uk/luna/images/LUNAIIIF80.png",
         "label": "AV Experiment",
-        "description" : "Telling the story of Scotland Netherlands 1978",
+        "description" : "Telling the story of Scotland's attempts to get to the 1978 World Cup quarter finals.",
+        #"description" : "Telling the story of our Art Acquisitions.",
         "sequences": sequence_array,
 
     }
 
+    #outfile = open('rhino.json', 'w')
     outfile = open('arg_78.json', 'w')
     json.dump(out_data, outfile)
     #response.close()

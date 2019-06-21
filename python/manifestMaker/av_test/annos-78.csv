@@ -1,43 +1,65 @@
 ﻿type,format,value,width,height,duration,target,anno_id,id
-Image,image/jpeg,0,0,0,120,"#xywh=0,0,1200,1200&t=0,194",1,https://librarylabs.ed.ac.uk/iiif/media/arg78.png
+Image,image/jpeg,0,0,0,120,"#xywh=0,0,1200,1200&t=0,208",1,https://librarylabs.ed.ac.uk/iiif/media/arg78.png
 Audio,audio/mp3,,,,195,"#xywh=400,100,200,100&t=0,162.5",2,https://librarylabs.ed.ac.uk/iiif/media/oleola.mp3
-Image,image/jpeg,200,800,5,120,"#xywh=1000,100,200,800&t=3,194",1,https://librarylabs.ed.ac.uk/iiif/media/scale-black.jpg
-Image,image/jpeg,1000,100,0,180,"#xywh=20,870,1155,150&t=0,194",1,https://librarylabs.ed.ac.uk/iiif/media/black-bar.jpg
+Image,image/jpeg,200,800,5,120,"#xywh=1000,100,200,800&t=3,208",1,https://librarylabs.ed.ac.uk/iiif/media/scale-black.jpg
+Image,image/jpeg,1000,100,0,180,"#xywh=20,870,1155,150&t=0,208",1,https://librarylabs.ed.ac.uk/iiif/media/black-bar.jpg
 Image,image/jpeg,75,75,3,52,"#xywh=970,535,75,75&t=3,55",1,https://librarylabs.ed.ac.uk/iiif/media/Scotland_badge.png
-TextualBody,text/plain,Scotland famously never get past the first round in a World Cup. Just a win by three goals and we're there!,,,2,"#xywh=100,900,1000,100&t=0,5",3,
-TextualBody,text/plain,Only problem... we're playing the mighty Netherlands! Will we regret our failure to get the wins against Peru and Iran? Over to Mendoza we go...,,,2,"#xywh=100,900,1000,100&t=5,10",3,
+TextualBody,text/plain,<h1>Can Scotland get out of their World Cup group? Just a win by THREE GOALS and we're there!</h1>,,,2,"#xywh=70,845,1100,100&t=0,4",3,
+TextualBody,text/plain,<h1>Only problem... we're playing the mighty Netherlands!</h1>,,,2,"#xywh=70,845,1100,100&t=4,7",3,
+TextualBody,text/plain,<h1>Will we regret our failure to beat the less mighty Peru and Iran?</h1>,,,2,"#xywh=70,845,1100,100&t=7,10",3,
+TextualBody,text/plain,<h1>Over to Mendoza we go...</h1>,,,2,"#xywh=100,900,1000,100&t=10,15",3,
 Image,image/jpeg,600,200,10,30,"#xywh=220,650,620,100&t=10,50",1,https://librarylabs.ed.ac.uk/iiif/media/sco00ned.jpg
 Video,video/mp4,900,500,10,30,"#xywh=79,100,900,500&t=10,51",1,https://librarylabs.ed.ac.uk/iiif/media/holland10scotland.mp4
-TextualBody,text/plain,First blood to the Netherlands (never a penalty!). We need four now.,,,2,"#xywh=100,900,1000,100&t=49,52",3,
-TextualBody,text/plain,Fun fact! That was the 1000th goal in the history of the World Cup.,,,2,"#xywh=100,900,1000,100&t=52,57",3,
+TextualBody,text/plain,<h1>PENALTY! NEVER!!</h1>,,,2,"#xywh=100,900,1000,100&t=28,35",3,
+TextualBody,text/plain,<h1>First blood to the Netherlands. We need FOUR now.<h1>,,,2,"#xywh=100,845,1100,100&t=49,52",3,
+TextualBody,text/plain,<h1>Fun fact! That was the 1000th goal in the history of the World Cup.<h1>,,,2,"#xywh=70,845,1100,100&t=52,57",3,
 Image,image/jpeg,75,75,30,50,"#xywh=272,100,500,500&t=51,57",1,https://librarylabs.ed.ac.uk/iiif/media/1000.jpg
 Image,image/jpeg,75,75,30,50,"#xywh=970,650,75,75&t=55,83",1,https://librarylabs.ed.ac.uk/iiif/media/Scotland_badge.png
 Video,video/mp4,900,500,10,50,"#xywh=79,100,900,500&t=57,79",1,https://librarylabs.ed.ac.uk/iiif/media/holland11scotland.mp4
 Image,image/jpeg,600,200,10,30,"#xywh=220,650,620,100&t=50,74",1,https://librarylabs.ed.ac.uk/iiif/media/sco01ned.jpg
 Image,image/jpeg,75,75,3,52,"#xywh=970,535,75,75&t=83,110",1,https://librarylabs.ed.ac.uk/iiif/media/Scotland_badge.png
-TextualBody,text/plain,Bit more like it. Kenny Dalglish levels just before half time.,,,2,"#xywh=100,900,1000,100&t=74,79",3,
-TextualBody,text/plain,Dalglish went on to become Scotland's record cap-holder and joint-record goalscorer.,,,2,"#xywh=100,900,1000,100&t=79,84",3,
+TextualBody,text/plain,<h1>YESSS!!!</h1>,,,2,"#xywh=100,900,1000,100&t=71,74",3,
+TextualBody,text/plain,<h1>Bit more like it. Kenny Dalglish levels just before half time.</h1>,,,2,"#xywh=100,845,1100,100&t=74,79",3,
+TextualBody,text/plain,<h1>Dalglish went on to become Scotland's record cap-holder...</h1>,,,2,"#xywh=100,845,1100,100&t=79,82",3,
+TextualBody,text/plain,<h1>...and joint-record goalscorer.</h1>,,,2,"#xywh=100,900,1000,100&t=82,86",3,
 Image,image/jpeg,75,75,30,50,"#xywh=400,100,278,400&t=79,84",1,https://librarylabs.ed.ac.uk/iiif/media/dalglish.jpg
 Image,image/jpeg,600,200,10,30,"#xywh=220,650,620,100&t=74,105",1,https://librarylabs.ed.ac.uk/iiif/media/sco11ned.jpg
 Video,video/mp4,900,500,10,50,"#xywh=79,100,900,500&t=84,106",1,https://librarylabs.ed.ac.uk/iiif/media/holland12scotland.mp4
 Image,image/jpeg,75,75,3,52,"#xywh=970,420,75,75&t=110,150",1,https://librarylabs.ed.ac.uk/iiif/media/Scotland_badge.png
-TextualBody,text/plain,"Thanks to our own dubious penalty, we're in front! By one! Archie Gemmill does the business.",,,2,"#xywh=100,900,1000,100&t=105,108",3,
-TextualBody,text/plain,"That penalty was gained by the brilliant Graeme Souness, whose omission for the first two games is often cited as a reason for those bad results. He didn't even get a sticker.",,,2,"#xywh=100,900,1000,100&t=108,113",3,
+TextualBody,text/plain,<h1>PENALTY! ALSO NEVER (in all honesty)!!</h1>,,,2,"#xywh=100,900,1000,100&t=93,98",3,
+TextualBody,text/plain,"<h1>And we're in front! Archie Gemmill does the business.</h1>",,,2,"#xywh=100,845,1100,100&t=105,108",3,
+TextualBody,text/plain,"<h1>That penalty was gained by the often brilliant Graeme Souness...</h1>",,,2,"#xywh=100,845,1100,100&t=108,111",3,
+TextualBody,text/plain,"<h1>...whose omission for the first two games is often cited as a reason for those bad results.</h1>",,,2,"#xywh=70,845,1100,100&t=111,114",3,
+TextualBody,text/plain,"<h1>He didn't even get a sticker.</h1>",,,2,"#xywh=100,900,1000,100&t=114,117",3,
 Image,image/jpeg,75,75,30,50,"#xywh=365,100,340,400&t=106,113",1,https://librarylabs.ed.ac.uk/iiif/media/souness.jpg
 Image,image/jpeg,600,200,10,30,"#xywh=220,650,620,100&t=105,132",1,https://librarylabs.ed.ac.uk/iiif/media/sco21ned.jpg
 Video,video/mp4,900,500,10,50,"#xywh=79,100,900,500&t=113,150",1,https://librarylabs.ed.ac.uk/iiif/media/holland13scotland.mp4
 Image,image/jpeg,75,75,3,52,"#xywh=970,305,75,75&t=150,165",1,https://librarylabs.ed.ac.uk/iiif/media/Scotland_badge.png
-TextualBody,text/plain,"Archie Gemmill has just scored the greatest goal in Scotland's history. Even though I was only one at the time, I'm SURE I remember it. Just one away. Come on Scotland.",,,2,"#xywh=100,900,1000,100&t=132,150",3,
-TextualBody,text/plain,"It went on to take on a new place in Scottish culture in an infamous scene in the Trainspotting movie.",,,2,"#xywh=100,900,1000,100&t=150,155",3,
+TextualBody,text/plain,"<h1>Oh, what's this?</h1>",,,2,"#xywh=100,860,1000,100&t=127,129",3,
+TextualBody,text/plain,"<h1>GO ON WEE MAN!</h1>",,,2,"#xywh=100,860,1000,100&t=129,132",3,
+TextualBody,text/plain,"<h1>Archie Gemmill has just scored the greatest goal in Scotland's history!</h1>",,,2,"#xywh=100,860,1000,100&t=132,137",3,
+TextualBody,text/plain,"<h1>Even though I was only one at the time, I'm SURE I remember it.</h1>",,,2,"#xywh=100,860,1000,100&t=137,140",3,
+TextualBody,text/plain,"<h1>JUST ONE TO GET!!</h1>",,,2,"#xywh=100,860,1000,100&t=140,145",3,
+TextualBody,text/plain,"<h1>COME ON SCOTLAND!!!</h1>",,,2,"#xywh=100,860,1000,100&t=145,150",3,
+TextualBody,text/plain,"<h1>That goal went on to take on a new place in Scottish culture...</h1>",,,2,"#xywh=100,845,1100,100&t=150,153",3,
+TextualBody,text/plain,"<h1>....in an infamous scene in the Trainspotting movie.<h1>",,,2,"#xywh=100,845,1100,100&t=153,155",3,
 Image,image/jpeg,75,75,30,50,"#xywh=137,100,800,500&t=150,155",1,https://librarylabs.ed.ac.uk/iiif/media/trainspottingarchie.jpg
 Image,image/jpeg,600,200,10,30,"#xywh=220,650,620,100&t=132,164",1,https://librarylabs.ed.ac.uk/iiif/media/sco31ned.jpg
 Video,video/mp4,900,500,10,50,"#xywh=79,100,900,500&t=155,175",1,https://librarylabs.ed.ac.uk/iiif/media/holland23scotland.mp4
-Image,image/jpeg,75,75,3,52,"#xywh=970,420,75,75&t=165,194",1,https://librarylabs.ed.ac.uk/iiif/media/Scotland_badge.png
-TextualBody,text/plain,That was NOT in the script. Thanks Johnny Rep. Two needed now.,,,2,"#xywh=100,900,1000,100&t=164,175",3,
-Image,image/jpeg,600,200,10,30,"#xywh=220,650,620,100&t=164,194",1,https://librarylabs.ed.ac.uk/iiif/media/sco32ned.jpg
-TextualBody,text/plain,Full time. No time for the unlikely comeback- sadly.,,,2,"#xywh=100,900,1000,100&t=175,184",3,
-TextualBody,text/plain,"This typifies the glorious failure the Scotland fan is destined to endure- so close and yet so very, very far...",,,2,"#xywh=100,900,1000,100&t=184,194",3,
+Image,image/jpeg,75,75,3,52,"#xywh=970,420,75,75&t=165,208",1,https://librarylabs.ed.ac.uk/iiif/media/Scotland_badge.png
+TextualBody,text/plain,<h1>But wait...</h1>.,,,2,"#xywh=100,900,1000,100&t=155,158",3,
+TextualBody,text/plain,<h1>This looks ominous...</h1>.,,,2,"#xywh=100,900,1000,100&t=158,164",3,
+TextualBody,text/plain,<h1>Oh dear. That was NOT in the script.</h1>,,,2,"#xywh=100,900,1000,100&t=164,170",3,
+TextualBody,text/plain,<h1>Thanks Johnny Rep. Two needed now.</h1>,,,2,"#xywh=100,900,1000,100&t=170,173",3,
+TextualBody,text/plain,<h1>But hardly any time....</h1>,,,2,"#xywh=100,900,1000,100&t=173,176",3,
+Image,image/jpeg,600,200,10,30,"#xywh=220,650,620,100&t=164,208",1,https://librarylabs.ed.ac.uk/iiif/media/sco32ned.jpg
+TextualBody,text/plain,<h1>And that's full time. A tragic tale.</h1>,,,2,"#xywh=100,900,1000,100&t=176,179",3,
+TextualBody,text/plain,"<h1>So close and yet so very, very far...</h1>",,,2,"#xywh=100,900,1000,100&t=179,183",3,
+TextualBody,text/plain,"<h1>This glorious failure...</h1>",,,2,"#xywh=100,900,1000,100&t=183,187",3,
+TextualBody,text/plain,"<h1>...TYPIFIES what it is to be Scottish.</h1>",,,2,"#xywh=100,900,1000,100&t=187,191",3,
+TextualBody,text/plain,"<h1>It is simply what we are destined...</h1>",,,2,"#xywh=100,900,1000,100&t=191,195",3,
+TextualBody,text/plain,"<h1>...to endure.</h1>",,,2,"#xywh=100,900,1000,100&t=195,208",3,
 Image,image/jpeg,900,500,10,50,"#xywh=175,100,700,500&t=175,184",1,https://librarylabs.ed.ac.uk/iiif/media/fulltime.png
-Image,image/jpeg,900,500,10,50,"#xywh=215,100,634,382&t=184,194",1,https://librarylabs.ed.ac.uk/iiif/media/cryingfan.jpg
+Image,image/jpeg,900,500,10,50,"#xywh=215,100,634,382&t=184,208",1,https://librarylabs.ed.ac.uk/iiif/media/cryingfan.jpg
 Audio,audio/mp3,,,,195,"#xywh=400,100,200,100&t=162.5,164",2,https://librarylabs.ed.ac.uk/iiif/media/stop.mp3
-Audio,audio/mp3,,,,195,"#xywh=400,100,200,100&t=175,194",2,https://librarylabs.ed.ac.uk/iiif/media/argentina.mp3
+Audio,audio/mp3,,,,195,"#xywh=400,100,200,100&t=175,208",2,https://librarylabs.ed.ac.uk/iiif/media/argentina.mp3
