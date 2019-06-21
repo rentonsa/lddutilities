@@ -98,6 +98,8 @@ QUERY = '(updatedsince:"' + DATE_FORMATTED + '" AND ' + QUERY_PARM
 
 URL = ALL_VARS['API_URL'] + QUERY +  ALL_VARS['FIELDS'] +  ALL_VARS['LIMIT']
 
+LOG_FILE = open(COLLECTION + "/" + ENVIRONMENT + "dspace_loader_api.log", "w")
+
 def parse_json(url):
     """
     Get Object info from API and return as json
@@ -118,7 +120,8 @@ def parse_json(url):
         data = response.read().decode("utf-8")
         return json.loads(data)
     except Exception:
-        print("nothing to run")
+        LOG_FILE.write("nothing to run")
+        LOG_FILE.write("\n")
 
 def map_md(key, value, et_out, outroot):
     """
@@ -176,8 +179,11 @@ def get_subfolder(item_acc_no):
     existing = False
     file_master = open(COLLECTION + "/" + ENVIRONMENT + "mapfile-master.txt")
     for line in file_master.readlines():
-        acc_no_len = len(item_acc_no)
-        if item_acc_no == line[:acc_no_len]:
+        try:
+            line_bits =line.split(" ")
+        except Exception:
+            line_bits = line.split("\t")
+        if item_acc_no == line_bits[0]:
             existing = True
             FM.write(line)
         if existing:
@@ -211,7 +217,8 @@ def manifest_url(manifest_array, dealing_image):
     iiif_manifest = dealing_image.replace('http', 'https')
     iiif_manifest = iiif_manifest.replace("/iiif/", "/iiif/m/")
     iiif_manifest = iiif_manifest.replace("full/full/0/default.jpg", "manifest")
-    print('Image passed: ' + iiif_manifest)
+    LOG_FILE.write('Image passed: ' + iiif_manifest)
+    LOG_FILE.write("\n")
     manifest_array.append(iiif_manifest)
     return manifest_array
 
@@ -343,7 +350,8 @@ def get_ok_images(coll):
         public_image_url = ALL_VARS['API_AV_CHECK_URL'] + ALL_VARS['ART_PUBLIC_IMAGES_QUERY'] + ALL_VARS['LIMIT']
 
     response = myopener.open(public_image_url)
-    print("URL" + public_image_url)
+    LOG_FILE.write("URL" + public_image_url)
+    LOG_FILE.write("\n")
     data = response.read().decode("utf-8")
     image_data = json.loads(data)
     images = image_data["_links"]["records"]
@@ -358,7 +366,8 @@ def main():
     """
     if FILTERED == '1':
         public_image_list = get_ok_images(COLLECTION)
-    print(URL)
+    LOG_FILE.write(URL)
+    LOG_FILE.write("\n")
     data = parse_json(URL)
     if data:
         records = 0
@@ -386,12 +395,14 @@ def main():
 
             item_acc_no = get_acc_no(record)
 
-            print("working with ACC_NO " + item_acc_no + " (VERNON SYSTEM ID " + system_id +")")
+            LOG_FILE.write("working with ACC_NO " + item_acc_no + " (VERNON SYSTEM ID " + system_id +")")
+            LOG_FILE.write("\n")
 
             try:
                 subfolder = get_subfolder(item_acc_no)
             except Exception:
-                print("bad accession no")
+                LOG_FILE.write("bad accession no")
+                LOG_FILE.write("\n")
                 bad_acc_no_array.append(system_id)
 
             if os.path.exists(subfolder):
@@ -403,7 +414,8 @@ def main():
                 contentsfile = subfolder + "/contents"
                 cfile = open(contentsfile, "w")
 
-            print("Writing to " + out_file)
+            LOG_FILE.write("Writing to " + out_file)
+            LOG_FILE.write("\n")
 
             indexed_array = []
 
@@ -473,7 +485,8 @@ def main():
 
             while sort_item < sorted_len:
                 dealing_image = str(sorted_array[sort_item]['iiifurl'])
-                print("working with " + dealing_image)
+                LOG_FILE.write("working with " + dealing_image)
+                LOG_FILE.write("\n")
                 if FILTERED == "1":
                     matched = False
                     for ok_image in public_image_list:
@@ -483,7 +496,8 @@ def main():
                             manifest_array = manifest_url(manifest_array, dealing_image)
                             image_total += 1
                     if not matched:
-                        print("non-public image" + dealing_image)
+                        LOG_FILE.write("non-public image" + dealing_image)
+                        LOG_FILE.write("\n")
                 else:
                     et_out = iiif_md(dealing_image, et_out, outroot)
                     manifest_array = manifest_url(manifest_array, dealing_image)
@@ -498,21 +512,30 @@ def main():
             write_md_to_file(out_file, et_out, outroot)
             records += 1
 
-        print('Processed ' + str(records) + ' items.')
-        print('Processed ' + str(image_total) + ' IIIF images.')
-        print('Processed ' + str(sound_video_total) + ' non-image media.')
-        print('Processed ' + str(manifest_total) + ' IIIF manifests.')
-        print('Skipped ' + str(len(bad_acc_no_array)) + ' records with no accession number.')
-        print('Skipped ' + str(len(duplicate_array)) + ' duplicate accession numbers.')
+        LOG_FILE.write('Processed ' + str(records) + ' items.')
+        LOG_FILE.write("\n")
+        LOG_FILE.write('Processed ' + str(image_total) + ' IIIF images.')
+        LOG_FILE.write("\n")
+        LOG_FILE.write('Processed ' + str(sound_video_total) + ' non-image media.')
+        LOG_FILE.write("\n")
+        LOG_FILE.write('Processed ' + str(manifest_total) + ' IIIF manifests.')
+        LOG_FILE.write("\n")
+        LOG_FILE.write('Skipped ' + str(len(bad_acc_no_array)) + ' records with no accession number.')
+        LOG_FILE.write("\n")
+        LOG_FILE.write('Skipped ' + str(len(duplicate_array)) + ' duplicate accession numbers.')
+        LOG_FILE.write("\n")
         for badacc in bad_acc_no_array:
-            print("System ID to check: " + badacc)
+            LOG_FILE.write("System ID to check: " + badacc)
+            LOG_FILE.write("\n")
         for dupacc in duplicate_array:
-            print("Dup image: " + dupacc)
+            LOG_FILE.write("Dup image: " + dupacc)
+            LOG_FILE.write("\n")
         for badimage in bad_image_array:
-            print("Image dead: " + badimage)
+            LOG_FILE.write("Image dead: " + badimage)
+            LOG_FILE.write("\n")
 
         FM.close()
-        print('Finished.')
+        LOG_FILE.write('Finished.')
 
 if __name__ == '__main__':
     main()
