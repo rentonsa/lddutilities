@@ -30,7 +30,7 @@ PARSER = argparse.ArgumentParser()
 
 PARSER.add_argument('-c', '--collection', action="store", dest="collection", help="collection loading", default="art")
 PARSER.add_argument('-e', '--environment', action="store", dest="environment", help="environment- test or live", default="live")
-PARSER.add_argument('-d', '--days', action="store", dest="days", help="number of days", default="1")
+PARSER.add_argument('-d', '--days', action="store", dest="days", help="number of days", default="180")
 
 ARGS = PARSER.parse_args()
 
@@ -65,7 +65,8 @@ START_DATE = date.today() - timedelta(**{DATE_PERIOD: int(DAYS)})
 DATE_FORMATTED = START_DATE.strftime("%d %m %Y")
 DATE_FORMATTED = DATE_FORMATTED.replace(" ", "%20")
 
-QUERY = '(updatedsince:"' + DATE_FORMATTED + '" AND ' + QUERY_PARM
+#QUERY = '(updatedsince:"' + DATE_FORMATTED + '" AND ' + QUERY_PARM
+QUERY = '(' + QUERY_PARM
 
 URL = ALL_VARS['API_URL'] + QUERY +  ALL_VARS['FIELDS'] +  ALL_VARS['LIMIT']
 
@@ -138,6 +139,7 @@ def main():
         bad_im_ref_array = []
         bad_work_record_id_array = []
         bad_accession_no_array = []
+        summary_array = []
 
         import xml.etree.cElementTree as ET
         root = ET.Element("recordList")
@@ -178,6 +180,8 @@ def main():
                     work_record_id_ok = True
                 if item["field"] == "repro_id_number":
                     im_ref_ok = True
+                if item["field"] == "repro_link_id":
+                    summary_array.append(item["value"])
 
             if not im_ref_ok:
                 bad_im_ref_array.append(str(system_id))
@@ -218,6 +222,10 @@ def main():
         out_file = "output/luna_md-" + time_str + ".xml"
 
         write_md_to_file(out_file, ET, root)
+
+        sum_file = open("summary_file.txt", "w")
+        sum_file.write("Images to upload \n")
+        sum_file.write(summary_array)
 
         print('Processed ' + str(records) + ' items.')
         print('Skipped ' + str(len(bad_accession_no_array)) + ' records with no accession number.')
