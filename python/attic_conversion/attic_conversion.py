@@ -34,7 +34,7 @@ def main():
     This is the main processing loop to traverse the API json returned
     """
     child_no = 0
-
+    nomatch = 0
     for child in root:
         child_no +=1
         intime = 1
@@ -56,12 +56,21 @@ def main():
         a650 = ''
         x650 = ''
         z650 = ''
+        matched_already = False
         filelist = []
+
         for item in child:
             if item.tag == 'controlfield':
                 controltag = item.attrib['tag']
                 if controltag=='001':
                     identifier = item.text
+                    fm = open("match_list.txt", "r")
+                    for line in fm.readlines():
+
+                        if identifier.strip() == line.strip():
+                            matched_already = True
+                            print("We already have " + identifier)
+
             if item.tag == 'controlfield':
                 controltag = item.attrib['tag']
                 if controltag=='008':
@@ -98,7 +107,6 @@ def main():
                             description= sub_field.text
 
                 if tag == '510':
-                    print ('ESTC' + str(item.text))
                     for sub_field in item:
                         code = sub_field.attrib['code']
                         if code == 'a':
@@ -156,7 +164,6 @@ def main():
             estc = a510 + "_" + c510
         else:
             estc = ''
-        print ("ESTC" + estc)
         if a600 != '':
             subject1 = a600 + " -- " + q600 + " -- " + c600 + " -- " + d600 + " -- " + t600
         else:
@@ -179,22 +186,36 @@ def main():
         file1 = ''
         file2 = ''
         file3 = ''
+        id1 = ''
+        id2 = ''
+        id3 = ''
         filesmatched = []
         for filelistitem in filelist:
             filelistitem = filelistitem.replace('/','.')+ ".pdf"
-            for files in os.walk(atticfolder):
-                for f in files:
-                    if f == filelistitem:
+            for file  in os.listdir(atticfolder):
+                if file.endswith(".pdf"):
+                    if file == filelistitem:
                         filesmatched.append(filelistitem)
-                        print(filelistitem)
+                        if file1 == '':
+                            file1 = file
+                            id1 = filelistitem
+                        elif file2 == '':
+                            file2 = file
+                            id2 =filelistitem
+                        else:
+                            file3 = file
+                            id3 = filelistitem
             filecounter += 1
 
+        if file1 == '' and file2 == '' and file3 == '':
+            print(identifier + "NO MATCH")
+            nomatch += 1
 
+        if matched_already == False:
+            rowforwrite = creator,title,date, publisher, subject0,  type, qualname, quallevel, abstract, catalogued, file1, file2, file3, subject1, subject2, subject3, estc, description, lang, identifier, id1,id2, id3
+            writer.writerow(rowforwrite)
 
-        rowforwrite = creator,title,date, publisher, subject0,  type, qualname, quallevel, abstract, catalogued, file1, file2, file3, subject1, subject2, subject3, estc, description, lang, identifier
-        writer.writerow(rowforwrite)
-
-
+    print("TOTAL NO PDF" + str(nomatch))
 
 if __name__ == '__main__':
     main()
