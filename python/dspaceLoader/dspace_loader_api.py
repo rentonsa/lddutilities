@@ -18,6 +18,9 @@ import shutil
 import json
 import csv
 import argparse
+import time
+import logging
+import sys
 from datetime import timedelta, date
 from api_variables import ALL_VARS
 
@@ -98,7 +101,22 @@ QUERY = '(updatedsince:"' + DATE_FORMATTED + '" AND ' + QUERY_PARM
 
 URL = ALL_VARS['API_URL'] + QUERY +  ALL_VARS['FIELDS'] +  ALL_VARS['LIMIT']
 
-LOG_FILE = open(COLLECTION + "/" + ENVIRONMENT + "dspace_loader_api.log", "w")
+TIME_STR= time.strftime("%Y%m%d")
+
+def setup_custom_logger(name):
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    handler = logging.FileHandler(COLLECTION + "/" + ENVIRONMENT + "dspace_loader_api.log." + TIME_STR, mode='w')
+    handler.setFormatter(formatter)
+    screen_handler = logging.StreamHandler(stream=sys.stdout)
+    screen_handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    logger.addHandler(screen_handler)
+    return logger
+
+logger = setup_custom_logger('myapp')
 
 def parse_json(url):
     """
@@ -120,8 +138,7 @@ def parse_json(url):
         data = response.read().decode("utf-8")
         return json.loads(data)
     except Exception:
-        LOG_FILE.write("nothing to run")
-        LOG_FILE.write("\n")
+        logger.info("nothing to run")
 
 def map_md(key, value, et_out, outroot):
     """
@@ -217,8 +234,7 @@ def manifest_url(manifest_array, dealing_image):
     iiif_manifest = dealing_image.replace('http', 'https')
     iiif_manifest = iiif_manifest.replace("/iiif/", "/iiif/m/")
     iiif_manifest = iiif_manifest.replace("full/full/0/default.jpg", "manifest")
-    LOG_FILE.write('Image passed: ' + iiif_manifest)
-    LOG_FILE.write("\n")
+    logger.info('Image passed: ' + iiif_manifest)
     manifest_array.append(iiif_manifest)
     return manifest_array
 
@@ -308,7 +324,7 @@ def process_non_image_avs(av_array, subfolder, cfile):
                     if _file in av_array[ani]:
                         shutil.copy(os.path.abspath(root + '/' + _file), subfolder)
                         cfile.write(_file + "\n")
-                        print("Processed sound or video " + _file)
+                        logger.info("Processed sound or video " + _file)
                         sound_video_amount += 1
         ani = ani + 1
     return sound_video_amount
@@ -331,11 +347,11 @@ def write_md_to_file(out_file, et_out, outroot):
     file.close()
 
 def get_ok_images(coll):
-    '''
+    """
     Get JSON for OK images for collection and turn into list to check against
     :param coll: collection
     :return: list of ok images
-    '''
+    """
     from urllib.request import FancyURLopener
 
     class MyOpener(FancyURLopener):
@@ -350,8 +366,7 @@ def get_ok_images(coll):
         public_image_url = ALL_VARS['API_AV_CHECK_URL'] + ALL_VARS['ART_PUBLIC_IMAGES_QUERY'] + ALL_VARS['LIMIT']
 
     response = myopener.open(public_image_url)
-    LOG_FILE.write("URL" + public_image_url)
-    LOG_FILE.write("\n")
+    logger.info("URL" + public_image_url)
     data = response.read().decode("utf-8")
     image_data = json.loads(data)
     images = image_data["_links"]["records"]
@@ -364,22 +379,21 @@ def main():
     """
     This is the main processing loop to traverse the API json returned
     """
+
     if FILTERED == '1':
         public_image_list = get_ok_images(COLLECTION)
-    LOG_FILE.write(URL)
-    LOG_FILE.write("\n")
+    logger.info(URL)
     data = parse_json(URL)
     if data:
         records = 0
         data_len = len(data["_embedded"]["records"])
-        print("Processing " + str(data_len) + "records")
+        logger.info("Processing " + str(data_len) + "records")
         bad_acc_no_array = []
         bad_image_array = []
         duplicate_array = []
         sound_video_total = 0
         sound_video_amount = 0
         manifest_total = 0
-        manifest_amount = 0
         image_total = 0
 
         while records < data_len:
@@ -395,14 +409,12 @@ def main():
 
             item_acc_no = get_acc_no(record)
 
-            LOG_FILE.write("working with ACC_NO " + item_acc_no + " (VERNON SYSTEM ID " + system_id +")")
-            LOG_FILE.write("\n")
+            logger.info("working with ACC_NO " + item_acc_no + " (VERNON SYSTEM ID " + system_id +")")
 
             try:
                 subfolder = get_subfolder(item_acc_no)
             except Exception:
-                LOG_FILE.write("bad accession no")
-                LOG_FILE.write("\n")
+                logger.info("bad accession no")
                 bad_acc_no_array.append(system_id)
 
             if os.path.exists(subfolder):
@@ -414,8 +426,7 @@ def main():
                 contentsfile = subfolder + "/contents"
                 cfile = open(contentsfile, "w")
 
-            LOG_FILE.write("Writing to " + out_file)
-            LOG_FILE.write("\n")
+            logger.info("Writing to " + out_file)
 
             indexed_array = []
 
@@ -485,8 +496,7 @@ def main():
 
             while sort_item < sorted_len:
                 dealing_image = str(sorted_array[sort_item]['iiifurl'])
-                LOG_FILE.write("working with " + dealing_image)
-                LOG_FILE.write("\n")
+                logger.info("working with " + dealing_image)
                 if FILTERED == "1":
                     matched = False
                     for ok_image in public_image_list:
@@ -496,8 +506,7 @@ def main():
                             manifest_array = manifest_url(manifest_array, dealing_image)
                             image_total += 1
                     if not matched:
-                        LOG_FILE.write("non-public image" + dealing_image)
-                        LOG_FILE.write("\n")
+                        logger.info("non-public image" + dealing_image)
                 else:
                     et_out = iiif_md(dealing_image, et_out, outroot)
                     manifest_array = manifest_url(manifest_array, dealing_image)
@@ -511,31 +520,21 @@ def main():
             cfile.close()
             write_md_to_file(out_file, et_out, outroot)
             records += 1
-
-        LOG_FILE.write('Processed ' + str(records) + ' items.')
-        LOG_FILE.write("\n")
-        LOG_FILE.write('Processed ' + str(image_total) + ' IIIF images.')
-        LOG_FILE.write("\n")
-        LOG_FILE.write('Processed ' + str(sound_video_total) + ' non-image media.')
-        LOG_FILE.write("\n")
-        LOG_FILE.write('Processed ' + str(manifest_total) + ' IIIF manifests.')
-        LOG_FILE.write("\n")
-        LOG_FILE.write('Skipped ' + str(len(bad_acc_no_array)) + ' records with no accession number.')
-        LOG_FILE.write("\n")
-        LOG_FILE.write('Skipped ' + str(len(duplicate_array)) + ' duplicate accession numbers.')
-        LOG_FILE.write("\n")
+        logger.info('Processed ' + str(records) + ' items.')
+        logger.info('Processed ' + str(image_total) + ' IIIF images.')
+        logger.info('Processed ' + str(sound_video_total) + ' non-image media.')
+        logger.info('Processed ' + str(manifest_total) + ' IIIF manifests.')
+        logger.info('Skipped ' + str(len(bad_acc_no_array)) + ' records with no accession number.')
+        logger.info('Skipped ' + str(len(duplicate_array)) + ' duplicate accession numbers.')
         for badacc in bad_acc_no_array:
-            LOG_FILE.write("System ID to check: " + badacc)
-            LOG_FILE.write("\n")
+            logger.info("System ID to check: " + badacc)
         for dupacc in duplicate_array:
-            LOG_FILE.write("Dup image: " + dupacc)
-            LOG_FILE.write("\n")
+            logger.info("Dup image: " + dupacc)
         for badimage in bad_image_array:
-            LOG_FILE.write("Image dead: " + badimage)
-            LOG_FILE.write("\n")
+            logger.info("Image dead: " + badimage)
 
         FM.close()
-        LOG_FILE.write('Finished.')
+        logger.info('Finished.')
 
 if __name__ == '__main__':
     main()
