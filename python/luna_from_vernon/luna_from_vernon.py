@@ -18,6 +18,7 @@ import shutil
 import json
 import csv
 import argparse
+import xml
 from datetime import timedelta, date
 from luna_from_vernon_variables import ALL_VARS
 
@@ -104,6 +105,11 @@ def map_md(key, value, flat_array):
     while map_row < MAP_LEN:
         if len(value) > 0:
             if MAP_ARRAY[map_row]['vernon'] == key:
+                if key == 'user_sym_15':
+                    link = value[16:]
+                    value_bits = link.split(".")
+                    value = value_bits[0]
+                    print("working with " + str(value))
                 flat_array.append({'field_group':str(MAP_ARRAY[map_row]['field_group']), 'field':str(MAP_ARRAY[map_row]['field']), 'value':str(value)})
         map_row = map_row + 1
     return flat_array
@@ -149,7 +155,7 @@ def main():
             id_link = str(data["_embedded"]["records"][records]["_links"]["self"]["href"])
             objectpoint = id_link.find('av')
             system_id = str(id_link[objectpoint+3:])
-            doc = ET.SubElement(root, "record")
+
             flat_array = []
             set_field_groups = []
             accession_ok = False
@@ -191,8 +197,9 @@ def main():
                 bad_accession_no_array.append(str(system_id))
 
 
-            for item in flat_array:
-                if accession_ok and work_record_id_ok and im_ref_ok:
+            if accession_ok and work_record_id_ok and im_ref_ok:
+                doc = ET.SubElement(root, "record")
+                for item in flat_array:
                     if item["field_group"] == 'none':
                         field = ET.SubElement(doc, "field")
                         field.set("name", item["field"])
@@ -200,6 +207,7 @@ def main():
                         value.text= item["value"]
                     else:
                         group_set = False
+
                         for group in set_field_groups:
                             if item["field_group"] == group:
                                 group_set = True
@@ -207,14 +215,16 @@ def main():
                             set_field_groups.append(item["field_group"])
                             field_group = ET.SubElement(doc, "entity")
                             field_group.set("name", item["field_group"])
-                        field = ET.SubElement(field_group, "field")
-                        field.set("name", item["field"])
-                        value = ET.SubElement(field, "value")
-                        value.text= item["value"]
-
+                        for entity in doc.findall('./entity'):
+                            print(entity.attrib)
+                            if entity.attrib['name'] == item["field_group"]:
+                                print("miracle")
+                        #field_group = root.findall('./entity[@id="' + item["field_group"] +'"')
+                                field = ET.SubElement(entity, "field")
+                                field.set("name", item["field"])
+                                value = ET.SubElement(field, "value")
+                                value.text= item["value"]
             records += 1
-
-        #print(ET.dump(root))
 
         import time
         time_str = time.strftime("%Y%m%d-%H%M%S")
@@ -225,7 +235,11 @@ def main():
 
         sum_file = open("summary_file.txt", "w")
         sum_file.write("Images to upload \n")
-        sum_file.write(summary_array)
+        sum_len = len(summary_array)
+        sum_row = 0
+        while sum_row < sum_len:
+            sum_file.write(summary_array[sum_row] + "\n")
+            sum_row+=1
 
         print('Processed ' + str(records) + ' items.')
         print('Skipped ' + str(len(bad_accession_no_array)) + ' records with no accession number.')
@@ -233,10 +247,13 @@ def main():
         print('Skipped ' + str(len(bad_im_ref_array)) + ' records with no digital filename.')
         for bad_acc in bad_accession_no_array:
             print("System ID to check (accession no): " + str(bad_acc))
+            sum_file.write("Consider fixing or deleting AV record " + str(bad_acc) + "\n")
         for bad_work in bad_work_record_id_array:
             print("System ID to check (av link id): " + str(bad_work))
+            sum_file.write("Consider fixing or deleting AV record " + str(bad_work) + "\n")
         for bad_image in bad_im_ref_array:
             print("Image dead: " + str(bad_image))
+            sum_file.write("Consider fixing or deleting AV record " + str(bad_image) + "\n")
         print('Finished.')
 
 if __name__ == '__main__':
