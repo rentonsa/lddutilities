@@ -5,6 +5,7 @@ import argparse
 import logging
 import time
 import sys
+import re
 from speccoll_variables import ALL_VARS
 
 ENVIRONMENT = ''
@@ -32,6 +33,8 @@ MAN_FOLDER = "manifests"
 for root, dirs, files in os.walk(MAN_FOLDER):
     for f in files:
         os.unlink(os.path.join(root, f))
+    for d in dirs:
+        shutil.rmtree(os.path.join(root, d))
         
 TIME_STR= time.strftime("%Y%m%d")
 
@@ -55,8 +58,8 @@ def create_dspace_record(manifest_array, out_file, et_out, outroot, manifest_id,
     from urllib.request import urlopen
     import json
     for manifest_ref in manifest_array:
-        manifest = manifest_ref.replace('detail', 'iiif/m') + '/manifest'
-        dealing_image = manifest_ref.replace('detail', 'iiif') + '/full/full/0/default.jpg'
+        manifest = manifest_ref[0].replace('detail', 'iiif/m') + '/manifest'
+        dealing_image = manifest_ref[0].replace('detail', 'iiif') + '/full/full/0/default.jpg'
         response = urlopen(manifest)
         try:
             resp_data = response.read().decode("utf-8")
@@ -124,6 +127,11 @@ def create_dspace_record(manifest_array, out_file, et_out, outroot, manifest_id,
                     dcvalue.set('element', 'date')
                     dcvalue.set('qualifier', 'created')
                     dcvalue.text = str(value)
+                if item["label"] == 'Catalogue Number':
+                    if re.match('99*66', value) is not None:
+                        alma_url = 'https://open-na.hosted.exlibrisgroup.com/alma/44UOE_INST/bibs/' + value
+                        alma_data = get_data(alma_url)
+                        logger.info(alma_data)
         image_count += 1
     dcvalue = et_out.SubElement(outroot, 'dcvalue')
     dcvalue.set('element', 'format')
@@ -148,12 +156,45 @@ def get_images(connection, image_get_sql):
             row = image_cursor.fetchone()
             if row == None:
                 break
-            manifest_array.append(row[0])
+            manifest_array.append(row)
     except Exception:
         logger.error("could not connect to cursor")
     return manifest_array
 
-def create_manifests(manifest_array, manifest_id, env, paged):
+def get_dummy_array():
+    blank_file = {
+        "@id": "https://librarylabs.ed.ac.uk/iiif/media/dummy/c1",
+        "label": "Dummy Canvas",
+        "height": 200,
+        "width": 200,
+        "description": "",
+          "images": [
+            {
+              "motivation": "sc:painting",
+              "on": "https://librarylabs.ed.ac.uk/iiif/media/dummy/c1",
+              "resource": {
+                "format": "image/jpeg",
+                "service": {
+                  "profile": "http://iiif.io/api/image/2/level2.json",
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://librarylabs.ed.ac.uk/iiif/media/dummy"
+                },
+                "height": 200,
+                "width": 200,
+                "@id": "https://librarylabs.ed.ac.uk/iiif/media/dummy.png",
+                "@type": "dctypes:Image"
+              },
+              "@type": "oa:Annotation"
+            }
+          ],
+          "thumbnail": {
+            "@id": "https://librarylabs.ed.ac.uk/iiif/media/dummy.png"
+          },
+          "@type": "sc:Canvas"
+        }
+    return blank_file
+
+def create_manifests(manifest_array, manifest_id, env, paged, need_dummy):
     from urllib.request import urlopen
     bad_image_array = []
     image_count = 0
@@ -167,8 +208,11 @@ def create_manifests(manifest_array, manifest_id, env, paged):
     context = ''
     man_id = ''
     related = ''
+    if need_dummy:
+        dummy_array = get_dummy_array()
+        canvases_array.append(dummy_array)
     for manifest_ref in manifest_array:
-        manifest = manifest_ref.replace('detail', 'iiif/m') + '/manifest'
+        manifest = manifest_ref[0].replace('detail', 'iiif/m') + '/manifest'
         response = urlopen(manifest)
         try:
             resp_data = response.read().decode("utf-8")
@@ -180,12 +224,13 @@ def create_manifests(manifest_array, manifest_id, env, paged):
             label = data["label"]
             attribution = data["attribution"]
             logo = data["logo"]
-            man_id = "http://" + env + "manifest.collections.ed.ac.uk/" + str(manifest_id.strip()) + ".json"
+            man_id = "http://" + env + "collectionsmedia.is.ed.ac.uk/iiif/" + str(manifest_id.strip()) + "/manifest"
             type = "sc:Manifest"
             context = data["@context"]
             related = data["@id"]
         canvas_array = data["sequences"][0]["canvases"][0]
         metadata = canvas_array["metadata"]
+
         canvases_array.append(canvas_array)
         for item in metadata:
             value = str(item['value']).replace("<span>", "")
@@ -213,7 +258,11 @@ def create_manifests(manifest_array, manifest_id, env, paged):
         "viewingHint": viewing_hint,
         "@context": context
     }
-    manifest_loc = "manifests/" + str(manifest_id.strip()) + '.json'
+    manifest_folder = "manifests/" + str(manifest_id.strip())
+    os.makedirs(manifest_folder)
+    os.chmod(manifest_folder, 0o777)
+
+    manifest_loc = manifest_folder + '/manifest'
     with open(manifest_loc, 'w') as jsonfile:
         json.dump(outdata, jsonfile)
 
@@ -385,12 +434,15 @@ def main():
                             if key == "work_id_number":
                                 if dspace == 'N':
                                     shelfmark = value
-                            if key == "work_catalogue_number":
-                                logger.info("I got a WORK CATALOGUE NUMBER and it is " + value)
+                            #if key == "work_catalogue_number":
+                                #logger.info("I got a WORK CATALOGUE NUMBER and it is " + value)
                             if key == "sequence":
+                                logger.info(str(key) + str(value))
                                 try:
-                                    sequence == int(value)
+                                    sequence = int(value)
+                                    logger.info("I will be using " +  str(sequence))
                                 except Exception:
+                                    logger.info("I am excepting")
                                     sequence = 99999
                             if key == "digital_object_reference":
                                 dor = value
@@ -441,7 +493,7 @@ def main():
             manifest_shelf = str(row[0]).strip()
             collection = str(row[1]).strip()
             dspace = str(row[2]).strip()
-            paged = str(row[3]).strip()
+            #paged = str(row[3]).strip()
             if manifest_shelf == 'N/A':
                 break
             else:
@@ -460,13 +512,26 @@ def main():
                                 manifest_id = manifest_check_insert(connection, manifest_shelf, collection)
                                 image_get_sql = "select i.jpeg_path, i.sequence from IMAGE i, IMAGE_DOR id where id.dor_id ='" + manifest_shelf + "' and collection = '" + collection + "' and id.image_id = i.image_id order by i.sequence, i.jpeg_path;"
                                 manifest_array = get_images(connection, image_get_sql)
-                                create_manifests(manifest_array, manifest_id, ENVIRONMENT, paged)
-                                if dspace == 'Y':
-                                    logger.info('MAKING A DSPACE RECORD')
-                                    out_file = get_subfolder(manifest_id)
-                                    import xml.etree.cElementTree as et_out
-                                    outroot = et_out.Element(ALL_VARS['DC_HEADER'])
-                                    create_dspace_record(manifest_array, out_file, et_out, outroot, manifest_id, manifest_shelf)
+                                if len(manifest_array) > 0:
+                                    paged = False
+                                    need_dummy = False
+                                    if int(manifest_array[0][1]) == 0:
+                                        paged = False
+                                    else:
+                                        paged = True
+                                        if (int(manifest_array[0][1])%2) == 0:
+                                            need_dummy = True
+                                        else:
+                                            need_dummy = False
+                                    create_manifests(manifest_array, manifest_id, ENVIRONMENT, paged, need_dummy)
+                                    if dspace == 'Y':
+                                        logger.info('MAKING A DSPACE RECORD')
+                                        out_file = get_subfolder(manifest_id)
+                                        import xml.etree.cElementTree as et_out
+                                        outroot = et_out.Element(ALL_VARS['DC_HEADER'])
+                                        create_dspace_record(manifest_array, out_file, et_out, outroot, manifest_id, manifest_shelf)
+                                else:
+                                    logger.error("DEAD MANIFEST ID" + str(manifest_id))
                     except (Exception, psycopg2.Error) as error:
                         logger.info("Failed to get from IMAGE_DOR", error)
                 else:
@@ -474,14 +539,25 @@ def main():
                     manifest_id = manifest_check_insert(connection, manifest_shelf, collection)
                     image_get_sql = "select jpeg_path, sequence from IMAGE where shelfmark ='" + manifest_shelf +  "' and collection = '" + collection + "' order by sequence, jpeg_path;"
                     manifest_array = get_images(connection, image_get_sql)
-                    create_manifests(manifest_array, manifest_id, ENVIRONMENT, paged)
-                    if dspace == 'Y':
-                        out_file = get_subfolder(manifest_id)
-                        import xml.etree.cElementTree as et_out
-                        outroot = et_out.Element(ALL_VARS['DC_HEADER'])
-                        create_dspace_record(manifest_array, out_file, et_out, outroot, manifest_id, manifest_shelf)
-
-
+                    if len(manifest_array) > 0:
+                        paged = False
+                        need_dummy = False
+                        if int(manifest_array[0][1]) == 0:
+                            paged = False
+                        else:
+                            paged = True
+                            if (int(manifest_array[0][1])%2) == 0:
+                                need_dummy = True
+                            else:
+                                need_dummy = False
+                        create_manifests(manifest_array, manifest_id, ENVIRONMENT, paged, need_dummy)
+                        if dspace == 'Y':
+                            out_file = get_subfolder(manifest_id)
+                            import xml.etree.cElementTree as et_out
+                            outroot = et_out.Element(ALL_VARS['DC_HEADER'])
+                            create_dspace_record(manifest_array, out_file, et_out, outroot, manifest_id, manifest_shelf)
+                    else:
+                        logger.error("DEAD MANIFEST ID" + str(manifest_id))
     except (Exception, psycopg2.Error) as error:
         logger.info("Failed along the way", error)
 

@@ -17,7 +17,7 @@ Sub CreateXML()
 
     'Header is so long it runs onto many lines- initialise here
     Dim firstheader
-    Dim secondheader
+    Dim secondheaderaa
     Dim thirdheader
     Dim fourthheader
     Dim Header
@@ -42,6 +42,7 @@ Sub CreateXML()
     Dim anaarray(1000) As String
     Dim maparray(1000) As String
     Dim walarray(1000) As String
+    Dim blaarray(1000) As String
 
     'Initialise file objects
     Dim fwmm As Object
@@ -82,6 +83,8 @@ Sub CreateXML()
     Set fmap = CreateObject("ADODB.Stream")
     Dim fwal As Object
     Set fwal = CreateObject("ADODB.Stream")
+    Dim fbla As Object
+    Set fbla = CreateObject("ADODB.Stream")
 
     'Need a second object so we can get rid of the BOM character
     Dim fwmmb As Object
@@ -122,6 +125,8 @@ Sub CreateXML()
     Set fmapb = CreateObject("ADODB.Stream")
     Dim fwalb As Object
     Set fwalb = CreateObject("ADODB.Stream")
+    Dim fblab As Object
+    Set fblab = CreateObject("ADODB.Stream")
 
     'Set file object properties
     fwmm.Type = 2
@@ -181,6 +186,9 @@ Sub CreateXML()
     fwal.Type = 2
     fwal.Charset = "utf-8"
     fwal.Open
+    fbla.Type = 2
+    fbla.Charset = "utf-8"
+    fbla.Open
 
     'Set binary file object properties and open
     fwmmb.Type = 1
@@ -240,6 +248,9 @@ Sub CreateXML()
     fwalb.Type = 1
     fwalb.Mode = 3
     fwalb.Open
+    fblab.Type = 1
+    fblab.Mode = 3
+    fblab.Open
 
     'Declare final file names
     wmmxml = "T:\diu\Worksheets\csv\WMM.xml"
@@ -261,6 +272,7 @@ Sub CreateXML()
     anaxml = "T:\diu\Worksheets\csv\ANA.xml"
     mapxml = "T:\diu\Worksheets\csv\MAP.xml"
     walxml = "T:\diu\Worksheets\csv\WAL.xml"
+    blaxml = "T:\diu\Worksheets\csv\BLA.xml"
 
     summfile = "T:\diu\Worksheets\csv\summary.txt"
 
@@ -285,6 +297,7 @@ Sub CreateXML()
     anacount = 0
     mapcount = 0
     walcount = 0
+    blacount = 0
 
      Close #99
     Open summfile For Output Lock Write As #99
@@ -416,6 +429,9 @@ Sub CreateXML()
                     Case "Walter Scott Image Collection"
                         walcoll = coll
                         shortcoll = "wal"
+                    Case "Blackie"
+                        blacoll = coll
+                        shortcoll = "bla"
                    Case Else
                         badcoll = "Y"
                   End Select
@@ -953,7 +969,18 @@ Sub CreateXML()
                         walcount = walcount + 1
                     End If
 
-                     Cells(i, 40) = "V"
+                    If shortcoll = "bla" Then
+                        If blacount = 0 Then
+                            fbla.WriteText Header & Chr(10)
+                        End If
+                        fbla.WriteText recordLine
+                        fbla.WriteText dataLine & Chr(10)
+                        fbla.WriteText recordCloser
+                        blaarray(walcount) = Cells(i, 8) & " ; " & Cells(i, 11)
+                        blacount = walcount + 1
+                    End If
+
+                    Cells(i, 40) = "V"
 
 
                 End If
@@ -1194,6 +1221,18 @@ Sub CreateXML()
             fwalb.Close
          End If
 
+         If blacount > 0 Then
+            fbla.WriteText "</recordList>"
+            fbla.Position = 3
+            fbla.CopyTo fblab
+            fbla.Flush
+            fbla.Close
+            fblab.SaveToFile blaxml, 2
+         Else
+            fbla.Close
+            fblab.Close
+         End If
+
          i = 0
 
          If wmmcount > 0 Then
@@ -1375,11 +1414,23 @@ Sub CreateXML()
             Next
         End If
 
+        i = 0
+
         If walcount > 0 Then
             Print #99, walcoll
             Print #99, "===================="
             For i = 0 To walcount
                 Print #99, walarray(i)
+            Next
+        End If
+
+        i = 0
+
+        If blacount > 0 Then
+            Print #99, blacoll
+            Print #99, "===================="
+            For i = 0 To blacount
+                Print #99, blaarray(i)
             Next
         End If
 
@@ -1440,7 +1491,9 @@ MsgBox "Hello DIU!"
             End Select
 
             titl = "Title: " & Cells(i, 13) & "; Author: " & Cells(i, 16) & "; Page No: " & Cells(i, 17) & "; Shelfmark: " & Cells(i, 12) & "; Date: " & Cells(i, 14)
+            titl = Replace(titl, Chr(10), "...")
             desc = "Collection: " & Cells(i, 22) & "; Persons: " & Cells(i, 23) & "; Event: " & Cells(i, 25) & "; Place: " & Cells(i, 20) & "; Category: " & Cells(i, 19) & "; Description: " & Cells(i, 21)
+            desc = Replace(desc, Chr(10), "...")
             city = "Edinburgh"
             pcde = "EH8 9LJ"
             exAd = "Centre for Research Collections, The University of Edinburgh, George Square"
@@ -1469,7 +1522,7 @@ MsgBox "Hello DIU!"
             Print #2, "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiUrlWork XmpText " & Chr(34) & URL & Chr(34)
 
             Close #2
-            Print #1, "exiv2 -m" & commands & " " & Chr(34) & "T:\diu\Crops\" & folder & "Process\" & imageno & "m.tif" & Chr(34) & " >> " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & ".txt" & Chr(34) & " 2>>&1"
+            Print #1, "exiv2 -m" & commands & " " & Chr(34) & "T:\diu\Crops\" & folder & "Process\" & imageno & "m.tif" & Chr(34) & " > " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & ".txt" & Chr(34) & " 2>>&1"
 
             Cells(i, 32) = "E"
 
@@ -1480,6 +1533,55 @@ MsgBox "Hello DIU!"
     shellstring = Chr(34) & embedcmd & Chr(34)
     Call Shell("cmd.exe /S /C " & shellstring, vbNormalFocus)
     'retval1 = Shell(Chr(34) & embedcmd & Chr(34), vbNormalFocus)
+
+End Sub
+
+
+Sub Error_check()
+
+    MsgBox "Hello DIU!"
+
+    Set oWorksheet = ThisWorkbook.Worksheets(1)
+    sName = oWorksheet.Name
+    MsgBox oWorksheet.Name
+
+    lCols = oWorksheet.Columns.Count
+
+    lRows = oWorksheet.Rows.Count
+
+    execdir = "T:\diu\Worksheets\"
+
+
+    For i = 4 To lRows
+        If Cells(i, 32) = "E" Then
+            imageno = Left(Cells(i, 8), 7)
+            error_file = execdir & "error\" & imageno & ".txt"
+            cmd_file = execdir & "commands\" & imageno & ".txt"
+            my_file = FreeFile()
+
+
+            j = 1
+            If FileLen(error_file) = 0 Then
+                Cells(i, 32) = "E"
+                rmerror = "del " & error_file
+                Call Shell("cmd.exe /S /C " & rmerror, vbNormalFocus)
+                rmcmd = "del " & error_file
+                Call Shell("cmd.exe /S /C " & rmcmd, vbNormalFocus)
+            Else
+                Open error_file For Input As my_file
+                While j = 1
+                    Line Input #my_file, text_line
+                    Cells(i, 32).Value = "R"
+                    Cells(i, 42).Value = text_line
+                    j = i + 1
+                Wend
+            End If
+
+
+        End If
+
+    Next
+    Close #1
 
 End Sub
 
@@ -1501,10 +1603,10 @@ MsgBox "Hello!"
     For i = 5 To lRows
         If Cells(i, 32) = "E" Then
             folder = Left(Cells(i, 8), 4) & "000-" & Left(Cells(i, 8), 4) & "999\"
-            imageNo = Left(Cells(i, 8), 7)
+            imageno = Left(Cells(i, 8), 7)
 
 
-            Print #1, "move T:\diu\Crops\" & folder & "Process\" & imageNo & "m.tif*  T:\diu\Crops\" & folder & "Process\" & imageNo & "c.tif"
+            Print #1, "move T:\diu\Crops\" & folder & "Process\" & imageno & "m.tif*  T:\diu\Crops\" & folder & "Process\" & imageno & "c.tif"
             'Print #1, "copy T:\diu\Crops\" & folder & "Process\" & imageNo & "c.tif*  T:\diu\Crops\" & folder & imageNo & "c.tif"
 
             Cells(i, 32) = "X"

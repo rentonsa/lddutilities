@@ -28,3 +28,10 @@ else
     echo "public art failure" >> publicart/load_wrapper.log
 fi
 
+if ./load_runner_api.sh geology 10683/111462 0 1
+then
+    echo "public art successful" >> geology/load_wrapper.log
+else
+    echo "public art failure" >> geology/load_wrapper.log
+fi
+
