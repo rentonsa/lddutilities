@@ -2,7 +2,7 @@ vernon:field_group:field:
 user_sym_20:none:work_record_id:
 user_sym_18:id_number:work_catalogue_number:
 brief_desc:repro_title:repro_title:
-user_sym_21:work_creator:creator:
+user_sym_21:work_creator:work_creator_details:
 user_sym_15:repro_id_number:repro_link_id:
 credit_line:repro_rights:repro_rights_statement:
 im_ref:repro_id_number:repro_id_number:

@@ -92,6 +92,12 @@ if COLLECTION == 'mimed':
 if COLLECTION == 'publicart':
     QUERY_PARM = ALL_VARS['PUBLIC_ART_QUERY']
 
+if COLLECTION == 'geology':
+    QUERY_PARM = ALL_VARS['GEOLOGY_QUERY']
+
+if COLLECTION == 'anatomy':
+    QUERY_PARM = ALL_VARS['ANATOMY_QUERY']
+
 DATE_PERIOD = "days"
 START_DATE = date.today() - timedelta(**{DATE_PERIOD: int(DAYS)})
 DATE_FORMATTED = START_DATE.strftime("%d %m %Y")

@@ -55,6 +55,11 @@ MAPPING = csv.DictReader(CSV_FILE, delimiter=':')
 MAP_ARRAY = list(MAPPING)
 MAP_LEN = len(MAP_ARRAY)
 
+OUTPUT_FOLDER = COLLECTION
+for root, dirs, files in os.walk(OUTPUT_FOLDER):
+    for f in files:
+        os.unlink(os.path.join(root, f))
+
 if COLLECTION == 'art':
     QUERY_PARM = ALL_VARS['ART_QUERY']
 
@@ -104,13 +109,20 @@ def map_md(key, value, flat_array):
     map_row = 0
     while map_row < MAP_LEN:
         if len(value) > 0:
+            image = True
             if MAP_ARRAY[map_row]['vernon'] == key:
                 if key == 'user_sym_15':
                     link = value[16:]
                     value_bits = link.split(".")
                     value = value_bits[0]
                     print("working with " + str(value))
-                flat_array.append({'field_group':str(MAP_ARRAY[map_row]['field_group']), 'field':str(MAP_ARRAY[map_row]['field']), 'value':str(value)})
+                if key == 'im_ref':
+                    print('I am un im_ref')
+                    if 'v' in value or 's' in value:
+                        print('This is not an image ' + value)
+                        image = False
+                if image:
+                    flat_array.append({'field_group':str(MAP_ARRAY[map_row]['field_group']), 'field':str(MAP_ARRAY[map_row]['field']), 'value':str(value)})
         map_row = map_row + 1
     return flat_array
 
@@ -172,7 +184,13 @@ def main():
                         for child in value:
                             flat_array = map_md(key, child, flat_array)
                     if twod:
+                        print(subvalue)
+                        if subkey == 'im_ref':
+                            if "s" in subvalue or "v" in subvalue:
+                                print("this is an audio or video" + subvalue)
+                                audio_video = True
                         value_len = len(value)
+
                         count = 0
                         while count < value_len:
                             flat_array = map_md(subkey, subvalue, flat_array)
@@ -186,10 +204,9 @@ def main():
                     work_record_id_ok = True
                 if item["field"] == "repro_id_number":
                     im_ref_ok = True
-                if item["field"] == "repro_link_id":
-                    summary_array.append(item["value"])
 
-            if not im_ref_ok:
+
+            if not im_ref_ok and not audio_video:
                 bad_im_ref_array.append(str(system_id))
             if not work_record_id_ok:
                 bad_work_record_id_array.append(str(system_id))
@@ -200,6 +217,8 @@ def main():
             if accession_ok and work_record_id_ok and im_ref_ok:
                 doc = ET.SubElement(root, "record")
                 for item in flat_array:
+                    if item["field"] == "repro_link_id":
+                        summary_array.append(item["value"])
                     if item["field_group"] == 'none':
                         field = ET.SubElement(doc, "field")
                         field.set("name", item["field"])
@@ -216,24 +235,21 @@ def main():
                             field_group = ET.SubElement(doc, "entity")
                             field_group.set("name", item["field_group"])
                         for entity in doc.findall('./entity'):
-                            print(entity.attrib)
                             if entity.attrib['name'] == item["field_group"]:
-                                print("miracle")
                         #field_group = root.findall('./entity[@id="' + item["field_group"] +'"')
                                 field = ET.SubElement(entity, "field")
                                 field.set("name", item["field"])
                                 value = ET.SubElement(field, "value")
                                 value.text= item["value"]
             records += 1
-
         import time
         time_str = time.strftime("%Y%m%d-%H%M%S")
 
-        out_file = "output/luna_md-" + time_str + ".xml"
+        out_file = OUTPUT_FOLDER + "/luna_md.xml"
 
         write_md_to_file(out_file, ET, root)
 
-        sum_file = open("summary_file.txt", "w")
+        sum_file = open(OUTPUT_FOLDER + "/summary_file.txt", "w")
         sum_file.write("Images to upload \n")
         sum_len = len(summary_array)
         sum_row = 0
