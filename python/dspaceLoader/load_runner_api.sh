@@ -26,7 +26,7 @@ then
                then
                   if [ -s $1/mapfile.txt ]
                   then
-                     if cat $1/mapfile.txt  | mail -s "$1 load: items loaded" lac-vernon@mlist.is.ed.ac.uk
+                     if cat $1/mapfile.txt  | mail -s "$1 load: items loaded" lac-vernon-auto-output@mlist.is.ed.ac.uk
                      then
                         echo "mail sent!" >> $new_file_name
                      fi

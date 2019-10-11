@@ -312,6 +312,7 @@ Sub CreateXML()
         Dim creatorArray() As String
         Dim placeArray() As String
         Dim prodPlaceArray() As String
+        Dim titleArray() As String
         Dim creatorNameArray() As String
         Dim creatorNameBits() As String
         shortcoll = ""
@@ -340,6 +341,7 @@ Sub CreateXML()
         reproLinkId = ""
         workRecordId = ""
         reproIdNumber = ""
+        titleItem = ""
         Title = ""
         Subset = ""
         relatedWorkTitle = ""
@@ -364,6 +366,8 @@ Sub CreateXML()
         creatorName = ""
         allCreators = ""
         creatorString = ""
+        allTitles = ""
+        rel_string = ""
 
         'If ready to process act, otherwise bypass
         If processed = "X" Then
@@ -462,7 +466,26 @@ Sub CreateXML()
                    goodrecord = "N"
                    MsgBox "major problem- no Title!" & " " & coll & " " & Cells(i, 8) & Cells(i, 9)
                 Else
-                   titleString = specialChars(Cells(i, 13))
+                    title_count = 0
+                    'Process repeating category
+                    titleString = Cells(i, 13)
+                    If InStr(titleString, ";") = 0 Then
+                        allTitles = entitys & "title" & entitycfieldst & "work_title" & fieldcvalues & Trim(specialChars(titleString)) & valueefieldeentitye
+                        rel_string = Trim(specialChars(titleString))
+                    Else
+                        titleArray() = Split(titleString, ";")
+                        For title_count = LBound(titleArray()) To UBound(titleArray())
+                            If titleArray(title_count) = "" Then
+                                allTitles = ""
+                            Else
+                                If title_count = 0 Then
+                                    rel_string = Trim(specialChars(titleArray(title_count)))
+                                End If
+                                titleItem = entitys & "title" & entitycfieldst & "work_title" & fieldcvalues & Trim(specialChars(titleArray(title_count))) & valueefieldeentitye
+                                allTitles = allTitles & titleItem
+                            End If
+                        Next title_count
+                    End If
                 End If
 
                 'If no work record ID (in column 8 OR 9, don't process)
@@ -526,12 +549,12 @@ Sub CreateXML()
                     If Cells(i, 17) = "" Then
                         subsetIndex = ""
                         relatedWorkVolPageNo = entitye
-                        reproTitle = entitys & "repro_title" & entitycfieldst & "repro_title" & fieldcvalues & titleString & valueefieldeentitye
+                        reproTitle = entitys & "repro_title" & entitycfieldst & "repro_title" & fieldcvalues & rel_string & valueefieldeentitye
                     Else
                         pageString = specialChars(Cells(i, 17))
                         subsetIndex = fields & "work_subset_index" & fieldcvalues & pageString & valueefielde
                         relatedWorkVolPageNo = fields & "work_source_page_no" & fieldcvalues & pageString & valueefieldeentitye
-                        reproTitle = entitys & "repro_title" & entitycfieldst & "repro_title" & fieldcvalues & titleString & ", " & pageString & valueefieldeentitye
+                        reproTitle = entitys & "repro_title" & entitycfieldst & "repro_title" & fieldcvalues & rel_string & ", " & pageString & valueefieldeentitye
                     End If
 
                     reproRecordId = entitys & "repro_record" & entitycfieldst & "repro_record_id" & fieldcvalues & workString & "c.tif" & valueefielde
@@ -539,9 +562,9 @@ Sub CreateXML()
                     workRecordId = fields & "work_record_id" & fieldcvalues & workString & valueefielde
                     reproIdNumber = entitys & "repro_id_number" & entitycfieldst & "repro_id_number" & fieldcvalues & workString & "c" & valueefieldeentitye
 
-                    Title = entitys & "title" & entitycfieldst & "work_title" & fieldcvalues & titleString & valueefieldeentitye
-                    Subset = entitys & "subset" & entitycfieldst & "work_subset" & fieldcvalues & titleString & valueefielde
-                    relatedWorkTitle = entitys & "related_work" & entitycfieldst & "work_source" & fieldcvalues & titleString & valueefielde
+
+                    Subset = entitys & "subset" & entitycfieldst & "work_subset" & fieldcvalues & rel_string & valueefielde
+                    relatedWorkTitle = entitys & "related_work" & entitycfieldst & "work_source" & fieldcvalues & rel_string & valueefielde
 
                     If Cells(i, 12) = "" Then
                         MsgBox "major problem- no Shelfmark!" & coll & " " & Cells(i, 8) & Cells(i, 9)
@@ -751,7 +774,7 @@ Sub CreateXML()
                     End If
 
                     'Build XML file
-                    dataLine1 = workRecordId & licenceString & shelfmark & holdingInstitution & catalogueNumber & Title & Subset & subsetIndex & sequence & allCreators & dateString & Description & allProdPlaces & repository & allSubjectPersons & allSubjectPlaces & subjectEvent & allSubjectCats & relatedWorkTitle & relatedWorkVolPageNo & rightsStatement & catalogueEntry
+                    dataLine1 = workRecordId & licenceString & shelfmark & holdingInstitution & catalogueNumber & allTitles & Subset & subsetIndex & sequence & allCreators & dateString & Description & allProdPlaces & repository & allSubjectPersons & allSubjectPlaces & subjectEvent & allSubjectCats & relatedWorkTitle & relatedWorkVolPageNo & rightsStatement & catalogueEntry
                     dataLine2 = reproRecordId & reproLinkId & reproFileType & reproNotes & reproTitle & reproCreatorName & reproCreatorRoleDescription & reproRepository & reproIdNumber & reproRightsStatement & reproPublicationStatus
                     dataLine = dataLine1 & dataLine2
 
@@ -976,8 +999,8 @@ Sub CreateXML()
                         fbla.WriteText recordLine
                         fbla.WriteText dataLine & Chr(10)
                         fbla.WriteText recordCloser
-                        blaarray(walcount) = Cells(i, 8) & " ; " & Cells(i, 11)
-                        blacount = walcount + 1
+                        blaarray(blacount) = Cells(i, 8) & " ; " & Cells(i, 11)
+                        blacount = blacount + 1
                     End If
 
                     Cells(i, 40) = "V"
@@ -1464,6 +1487,8 @@ MsgBox "Hello DIU!"
 
     For i = 4 To lRows
         If Cells(i, 32) = "R" Then
+            Cells(i, 42).Value = ""
+            Cells(i, 43).Value = ""
             folder = Left(Cells(i, 8), 4) & "000-" & Left(Cells(i, 8), 4) & "999\"
             imageno = Left(Cells(i, 8), 7)
 
@@ -1482,7 +1507,7 @@ MsgBox "Hello DIU!"
                     copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Copyright in the original may be University of Edinburgh or rest elsewhere. Data Protection restrictions."
                 Case "Loan"
                     copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Copyright in the original currently rests with the creator, their estate, heirs or assignees. Permission has not been granted for  use by the University of Edinburgh (other than those deemed 'Fair Dealing such as educational, personal and non commercial research - unless otherwise stated)."
-               Case "OC"
+                Case "OC"
                     copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Out of Copyright."
                 Case "LHSA"
                     copyrightstring = "Copyright and Data Protection Restrictions. Not for Public Access."
@@ -1522,9 +1547,9 @@ MsgBox "Hello DIU!"
             Print #2, "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiUrlWork XmpText " & Chr(34) & URL & Chr(34)
 
             Close #2
-            Print #1, "exiv2 -m" & commands & " " & Chr(34) & "T:\diu\Crops\" & folder & "Process\" & imageno & "m.tif" & Chr(34) & " > " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & ".txt" & Chr(34) & " 2>>&1"
+            Print #1, "exiv2 -m" & commands & " " & Chr(34) & "T:\diu\Crops\" & folder & "Process\" & imageno & "*.tif" & Chr(34) & " > " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & ".txt" & Chr(34) & " 2>>&1"
 
-            Cells(i, 32) = "E"
+            Cells(i, 32) = "C"
 
         End If
 
@@ -1553,7 +1578,7 @@ Sub Error_check()
 
 
     For i = 4 To lRows
-        If Cells(i, 32) = "E" Then
+        If Cells(i, 32) = "C" Then
             imageno = Left(Cells(i, 8), 7)
             error_file = execdir & "error\" & imageno & ".txt"
             cmd_file = execdir & "commands\" & imageno & ".txt"
@@ -1572,7 +1597,19 @@ Sub Error_check()
                 While j = 1
                     Line Input #my_file, text_line
                     Cells(i, 32).Value = "R"
-                    Cells(i, 42).Value = text_line
+                    'Case statement to change the value to something readable
+                    If InStr(test_line, "Failed to open") > 0 Then
+                        Action = "MOVE FILE INTO PROCESS AND RETRY EMBED"
+                    Else
+                        If InStr(test_line, "Invalid command") > 0 Then
+                            Action = "CHECK MD FOR UNUSUAL FORMATTING AND RETRY EMBED"
+                        Else
+                            Action = "RETRY EMBED"
+                        End If
+                    End If
+
+                    Cells(i, 42).Value = Action
+                    Cells(i, 43).Value = text_line
                     j = i + 1
                 Wend
             End If
