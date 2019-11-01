@@ -387,6 +387,7 @@ def manifest_check_insert(connection, manifest_shelf, collection):
                     insert_man_cursor = connection.cursor()
                     insert_man_sql = "insert into MANIFEST_SHELFMARK (manifest_id, shelfmark, collection) VALUES (%s,%s, %s);"
                     insert_man_values = (manifest_id, manifest_shelf.strip(), str(collection.strip()))
+                    print(insert_man_values)
                     insert_man_cursor.execute(insert_man_sql, insert_man_values)
                     connection.commit()
                     inserted = True
@@ -447,16 +448,16 @@ def main():
     This is the main processing loop to traverse the API json returned
     """
     import psycopg2
-    connection = psycopg2.connect(user="srenton1",
-                                  password="",
-                                  host="127.0.0.1",
-                                  port="5432",
-                                  database="manifest_store")
+    connection = psycopg2.connect(user=ALL_VARS['DB_USER'],
+                                  password=ALL_VARS['DB_PASSWORD'],
+                                  host=ALL_VARS['DB_HOST'],
+                                  port=ALL_VARS['DB_PORT'],
+                                  database=ALL_VARS['DB_NAME'])
     truncate_tables(connection)
     try:
         cursor = connection.cursor()
         # Print PostgreSQL Connection properties
-        logger.info(connection.get_dsn_parameters(), "\n")
+        #logger.info(connection.get_dsn_parameters(), "\n")
         # Print PostgreSQL version
         cursor.execute("SELECT id, dspace_record from COLLECTION where run = 'Y' order by id;")
         while True:
