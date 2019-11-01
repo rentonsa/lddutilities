@@ -6,6 +6,7 @@ import logging
 import time
 import sys
 import re
+import csv
 from speccoll_variables import ALL_VARS
 
 ENVIRONMENT = ''
@@ -35,7 +36,14 @@ for root, dirs, files in os.walk(MAN_FOLDER):
         os.unlink(os.path.join(root, f))
     for d in dirs:
         shutil.rmtree(os.path.join(root, d))
-        
+
+CSV_FILE = open(ALL_VARS['MAP_FILE'], 'r')
+MAPPING = csv.DictReader(CSV_FILE, delimiter=':')
+MAP_ARRAY = list(MAPPING)
+MAP_LEN = len(MAP_ARRAY)
+
+FM = open(ENVIRONMENT + "mapfile.txt", "w")
+
 TIME_STR= time.strftime("%Y%m%d")
 
 def setup_custom_logger(name):
@@ -51,7 +59,36 @@ def setup_custom_logger(name):
     logger.addHandler(screen_handler)
     return logger
 
-logger = setup_custom_logger('myapp')        
+logger = setup_custom_logger('myapp')
+
+
+def map_md(key, value, et_out, outroot):
+    """
+    Map found field to its dublin core equivalent, and add to XML tree for the item
+    :param key: fieldname
+    :param value: field value
+    :param et_out: XML Tree before
+    :param outroot: dublin core header
+    :return et_out: XML Tree with additional entry
+    """
+    map_row = 0
+    while map_row < MAP_LEN:
+        if MAP_ARRAY[map_row]['raw'] == key:
+            if 'dc_prod_pri_date' in key:
+                value = value[7:]
+            mdschema = str(MAP_ARRAY[map_row]['dc'] + "value")
+            mdelement = str(MAP_ARRAY[map_row]['element'])
+            if MAP_ARRAY[map_row]['qualifier'] == 'noqual':
+                mdqualifier = str('')
+            else:
+                mdqualifier = str(MAP_ARRAY[map_row]['qualifier'])
+            if len(value) > 0:
+                dcvalue = et_out.SubElement(outroot, mdschema)
+                dcvalue.set('element', mdelement)
+                dcvalue.set('qualifier', mdqualifier)
+                dcvalue.text = value
+        map_row = map_row + 1
+    return et_out
 
 def create_dspace_record(manifest_array, out_file, et_out, outroot, manifest_id, manifest_shelf):
     image_count = 0
@@ -101,37 +138,60 @@ def create_dspace_record(manifest_array, out_file, et_out, outroot, manifest_id,
             canvas_array = data["sequences"][0]["canvases"][0]
             metadata = canvas_array["metadata"]
             for item in metadata:
+                key = str(item['label'])
                 value = str(item['value']).replace("<span>", "")
                 value = value.replace("</span>", "")
-                value = value.replace("&amp;", "and")
-                if item['label'] == "Shelfmark":
-                    dcvalue = et_out.SubElement(outroot, 'dcvalue')
-                    dcvalue.set('element', 'identifier')
-                    dcvalue.set('qualifier', '')
-                    if "ADO-" in manifest_shelf:
-                        dcvalue.text = manifest_shelf
-                    else:
-                        dcvalue.text = str(value)
-                if item['label'] == "Title":
-                    dcvalue = et_out.SubElement(outroot, 'dcvalue')
-                    dcvalue.set('element', 'title')
-                    dcvalue.set('qualifier', '')
-                    dcvalue.text = str(value)
-                if item['label'] == "Creator":
-                    dcvalue = et_out.SubElement(outroot, 'dcvalue')
-                    dcvalue.set('element', 'contributor')
-                    dcvalue.set('qualifier', 'author')
-                    dcvalue.text = str(value)
-                if item['label'] == "Date":
-                    dcvalue = et_out.SubElement(outroot, 'dcvalue')
-                    dcvalue.set('element', 'date')
-                    dcvalue.set('qualifier', 'created')
-                    dcvalue.text = str(value)
+                value = value.replace("&amp;", "and") 
                 if item["label"] == 'Catalogue Number':
-                    if re.match('99*66', value) is not None:
+                    out = re.match(r"^99", value)
+                    logger.info(str(out))
+                    if out is not None:
                         alma_url = 'https://open-na.hosted.exlibrisgroup.com/alma/44UOE_INST/bibs/' + value
                         alma_data = get_data(alma_url)
-                        logger.info(alma_data)
+                        logger.info(alma_url)
+                        if alma_data == '':
+                            logger.info("dead_url " + alma_url)
+                        else:
+                            for alma_key, alma_value in alma_data.items():
+                                logger.info(str(alma_key) + str(alma_value))
+                                twod = False
+                                if isinstance(alma_value, list):
+                                    try:
+                                        for subkey, subvalue in alma_value[0].items():
+                                            twod = True
+                                    except:
+                                        twod = False
+                                        for child in alma_value:
+                                            if not(isinstance(child, list)):
+                                                et_out = map_md(alma_key, child, et_out, outroot)
+                                    if twod:
+                                        value_len = len(alma_value)
+                                        count = 0
+                                        while count < value_len:
+                                            full_string = ''
+                                            for subkey, subvalue in alma_value[count].items():
+                                                full_string = full_string  + str(subvalue) + ' | '
+                                            et_out = map_md(alma_key, full_string, et_out, outroot)
+                                            count += 1
+                                else:
+                                    if isinstance(alma_value, dict):
+                                        full_string = ''
+                                        for subkey, subvalue in alma_value.items():
+                                            full_string = full_string + str(subvalue) + " | "  
+                                        et_out = map_md(alma_key, full_string, et_out, outroot)
+                                    else:
+                                        et_out = map_md(alma_key, alma_value, et_out, outroot)
+                else:
+                    if item['label'] == "Shelfmark":
+                        if "ADO-" in manifest_shelf:
+                            value = manifest_shelf
+                        else:
+                            value = str(value)
+
+                        et_out = map_md(key, value, et_out, outroot)
+                    else:
+                        et_out = map_md(key, value, et_out, outroot)
+
         image_count += 1
     dcvalue = et_out.SubElement(outroot, 'dcvalue')
     dcvalue.set('element', 'format')
@@ -194,7 +254,7 @@ def get_dummy_array():
         }
     return blank_file
 
-def create_manifests(manifest_array, manifest_id, env, paged, need_dummy):
+def create_manifests(manifest_array, manifest_id, env, paged, need_dummy, manifest_shelf):
     from urllib.request import urlopen
     bad_image_array = []
     image_count = 0
@@ -211,6 +271,7 @@ def create_manifests(manifest_array, manifest_id, env, paged, need_dummy):
     if need_dummy:
         dummy_array = get_dummy_array()
         canvases_array.append(dummy_array)
+
     for manifest_ref in manifest_array:
         manifest = manifest_ref[0].replace('detail', 'iiif/m') + '/manifest'
         response = urlopen(manifest)
@@ -221,13 +282,20 @@ def create_manifests(manifest_array, manifest_id, env, paged, need_dummy):
             break
             bad_image_array.append(manifest)
         if image_count == 0:
-            label = data["label"]
+            label = 'IIIF manifest for ' + str(manifest_shelf)
             attribution = data["attribution"]
             logo = data["logo"]
             man_id = "http://" + env + "collectionsmedia.is.ed.ac.uk/iiif/" + str(manifest_id.strip()) + "/manifest"
             type = "sc:Manifest"
             context = data["@context"]
             related = data["@id"]
+            if paged:
+                #if item['label'] == "Sequence":
+                #    try:
+                #        if int(value) > 0:
+                viewing_hint = 'paged'
+            else:
+                viewing_hint = 'individuals'
         canvas_array = data["sequences"][0]["canvases"][0]
         metadata = canvas_array["metadata"]
 
@@ -236,13 +304,7 @@ def create_manifests(manifest_array, manifest_id, env, paged, need_dummy):
             value = str(item['value']).replace("<span>", "")
             value = value.replace("</span>", "")
             value = value.replace("&", "&amp;")
-            if paged == 'Y':
-                if item['label'] == "Sequence":
-                    try:
-                        if int(value) > 0:
-                            viewing_hint = 'paged'
-                    except Exception:
-                        viewing_hint = 'individuals'
+
         image_count += 1
 
     sequences_array.append({"@type": "sc:Sequence",
@@ -273,7 +335,7 @@ def get_subfolder(manifest_id):
     :return: subfolder will be path including existing or new
     """
     existing = False
-    mapfile_name = ENVIRONMENT + "mapfile.txt"
+    mapfile_name = ENVIRONMENT + "mapfile-master.txt"
     #logger.info(mapfile_name)
     file_master = open(mapfile_name)
     for line in file_master.readlines():
@@ -282,6 +344,7 @@ def get_subfolder(manifest_id):
         if manifest_id.strip() == line[:manifest_id_len]:
             #logger.info("matched")
             existing = True
+            FM.write(line)
     if existing:
         subfolder = EXISTING_FOLDER + manifest_id
     else:
@@ -307,7 +370,7 @@ def manifest_check_insert(connection, manifest_shelf, collection):
     manifest_id = ''
     try:
         manifest_shelf_cursor = connection.cursor()
-        manifest_shelf_sql = "select manifest_id from MANIFEST_SHELFMARK where shelfmark = '" + str(manifest_shelf.strip()) + "' and collection ='" + str(collection.strip()) + "';"
+        manifest_shelf_sql = "select manifest_id from MANIFEST_SHELFMARK where upper(shelfmark) = upper('" + str(manifest_shelf.strip()) + "') and collection ='" + str(collection.strip()) + "';"
         manifest_shelf_cursor.execute(manifest_shelf_sql)
         row = manifest_shelf_cursor.fetchone()
         if row:
@@ -324,6 +387,7 @@ def manifest_check_insert(connection, manifest_shelf, collection):
                     insert_man_cursor = connection.cursor()
                     insert_man_sql = "insert into MANIFEST_SHELFMARK (manifest_id, shelfmark, collection) VALUES (%s,%s, %s);"
                     insert_man_values = (manifest_id, manifest_shelf.strip(), str(collection.strip()))
+                    print(insert_man_values)
                     insert_man_cursor.execute(insert_man_sql, insert_man_values)
                     connection.commit()
                     inserted = True
@@ -349,8 +413,14 @@ def get_data(url):
 
     myopener = MyOpener()
     response = myopener.open(url)
-    data = response.read().decode("utf-8")
-    image_data = json.loads(data)
+    try:
+        data = response.read().decode("utf-8")
+    except:
+        image_data = ''
+    try:
+        image_data = json.loads(data)
+    except:
+        image_data = ''
     return image_data
 
 def truncate_tables(connection):
@@ -378,18 +448,18 @@ def main():
     This is the main processing loop to traverse the API json returned
     """
     import psycopg2
-    connection = psycopg2.connect(user="srenton1",
-                                  password="",
-                                  host="127.0.0.1",
-                                  port="5432",
-                                  database="manifest_store")
+    connection = psycopg2.connect(user=ALL_VARS['DB_USER'],
+                                  password=ALL_VARS['DB_PASSWORD'],
+                                  host=ALL_VARS['DB_HOST'],
+                                  port=ALL_VARS['DB_PORT'],
+                                  database=ALL_VARS['DB_NAME'])
     truncate_tables(connection)
     try:
         cursor = connection.cursor()
         # Print PostgreSQL Connection properties
-        logger.info(connection.get_dsn_parameters(), "\n")
+        #logger.info(connection.get_dsn_parameters(), "\n")
         # Print PostgreSQL version
-        cursor.execute("SELECT id, dspace_record from COLLECTION order by id;")
+        cursor.execute("SELECT id, dspace_record from COLLECTION where run = 'Y' order by id;")
         while True:
             row = cursor.fetchone()
             if row == None:
@@ -430,19 +500,15 @@ def main():
                             if key == "work_shelfmark":
                                 if dspace == 'Y':
                                     shelfmark = value
-                                    logger.info("I got shelfmark" + shelfmark + " for image " + image_id)
                             if key == "work_id_number":
                                 if dspace == 'N':
                                     shelfmark = value
                             #if key == "work_catalogue_number":
                                 #logger.info("I got a WORK CATALOGUE NUMBER and it is " + value)
                             if key == "sequence":
-                                logger.info(str(key) + str(value))
                                 try:
                                     sequence = int(value)
-                                    logger.info("I will be using " +  str(sequence))
                                 except Exception:
-                                    logger.info("I am excepting")
                                     sequence = 99999
                             if key == "digital_object_reference":
                                 dor = value
@@ -484,7 +550,7 @@ def main():
     try:
         #loop round IMAGE table getting shelfmarks
         loop_shelf_cursor = connection.cursor()
-        loop_shelf_sql = "select distinct(i.shelfmark), i.collection, c.dspace_record, c.paged from IMAGE i, COLLECTION c where i.collection = c.id group by i.shelfmark, i.collection, c.dspace_record, c.paged order by i.shelfmark, i.collection;;"
+        loop_shelf_sql = "select distinct(upper(i.shelfmark)), i.collection, c.dspace_record, c.paged from IMAGE i, COLLECTION c where i.collection = c.id group by upper(i.shelfmark), i.collection, c.dspace_record, c.paged order by upper(i.shelfmark), i.collection;;"
         loop_shelf_cursor.execute(loop_shelf_sql)
         while True:
             row = loop_shelf_cursor.fetchone()
@@ -497,7 +563,7 @@ def main():
             if manifest_shelf == 'N/A':
                 break
             else:
-                if manifest_shelf == 'Archive':
+                if manifest_shelf == 'ARCHIVE':
                     logger.info("working on an Archive")
                     try:
                         dor_cursor = connection.cursor()
@@ -512,20 +578,20 @@ def main():
                                 manifest_id = manifest_check_insert(connection, manifest_shelf, collection)
                                 image_get_sql = "select i.jpeg_path, i.sequence from IMAGE i, IMAGE_DOR id where id.dor_id ='" + manifest_shelf + "' and collection = '" + collection + "' and id.image_id = i.image_id order by i.sequence, i.jpeg_path;"
                                 manifest_array = get_images(connection, image_get_sql)
+                                logger.info(manifest_array)
                                 if len(manifest_array) > 0:
                                     paged = False
                                     need_dummy = False
-                                    if int(manifest_array[0][1]) == 0:
+                                    if int(manifest_array[0][1]) == 99999:
                                         paged = False
                                     else:
                                         paged = True
                                         if (int(manifest_array[0][1])%2) == 0:
                                             need_dummy = True
                                         else:
-                                            need_dummy = False
-                                    create_manifests(manifest_array, manifest_id, ENVIRONMENT, paged, need_dummy)
+                                            need_dummy = False     
+                                    create_manifests(manifest_array, manifest_id, ENVIRONMENT, paged, need_dummy, manifest_shelf)
                                     if dspace == 'Y':
-                                        logger.info('MAKING A DSPACE RECORD')
                                         out_file = get_subfolder(manifest_id)
                                         import xml.etree.cElementTree as et_out
                                         outroot = et_out.Element(ALL_VARS['DC_HEADER'])
@@ -537,20 +603,21 @@ def main():
                 else:
                     logger.info("Working on " + manifest_shelf)
                     manifest_id = manifest_check_insert(connection, manifest_shelf, collection)
-                    image_get_sql = "select jpeg_path, sequence from IMAGE where shelfmark ='" + manifest_shelf +  "' and collection = '" + collection + "' order by sequence, jpeg_path;"
+                    image_get_sql = "select jpeg_path, sequence from IMAGE where upper(shelfmark) =upper('" + manifest_shelf +  "') and collection = '" + collection + "' order by sequence, jpeg_path;"
                     manifest_array = get_images(connection, image_get_sql)
+                    logger.info(manifest_array)
                     if len(manifest_array) > 0:
                         paged = False
                         need_dummy = False
-                        if int(manifest_array[0][1]) == 0:
+                        if int(manifest_array[0][1]) == 99999:
                             paged = False
                         else:
                             paged = True
                             if (int(manifest_array[0][1])%2) == 0:
                                 need_dummy = True
                             else:
-                                need_dummy = False
-                        create_manifests(manifest_array, manifest_id, ENVIRONMENT, paged, need_dummy)
+                                need_dummy = False         
+                        create_manifests(manifest_array, manifest_id, ENVIRONMENT, paged, need_dummy, manifest_shelf)
                         if dspace == 'Y':
                             out_file = get_subfolder(manifest_id)
                             import xml.etree.cElementTree as et_out
@@ -567,6 +634,7 @@ def main():
             loop_shelf_cursor.close()
             connection.close()
             logger.info("END OF PROG PostgreSQL connection is closed")
+    FM.close()
 
 if __name__ == '__main__':
     main()

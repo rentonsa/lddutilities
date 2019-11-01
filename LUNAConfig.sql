@@ -239,6 +239,24 @@ set INTRODUCTIONTEXT =
 where COLLECTIONID = 'UoEsha~5~5';
 
 #######################################
+#    GREECE: JOHN STUART BLACKIE
+#######################################
+
+
+update EXTENDEDCOLLECTIONPROPERTIES
+set INTRODUCTIONTEXT =
+'<font size =2 ><style>#inner{margin-left:10px; max-width:750px;text-align: justify;text-justify: inter-word;}</style>
+<div id="inner"><p>John Stuart Blackie (1809-1895) was Professor of Greek at the University of Edinburgh from 1852 to 1882.  He was a man of wide interests and enthusiasms, one of which was for the language and culture of Greece in his own time.
+ He promoted the study of ancient Greek through the modern language, and took a lively interest in contemporary Greek nationalism and the debates over the written form of the language.</p>
+
+<p>The collection consists of his books on modern Greece, bequeathed to the University after his death.  There are nearly 500 separate items in the collection, including works of literature, grammar and language, politics and current affairs, folklore,
+ some Classical Greek.  Most are in Greek, but some are about Greece in other European languages.  Some include inscriptions and correspondence from their authors, or marginal notes by Blackie.</p>
+ <br>
+<img src="https://images.is.ed.ac.uk/graphics/by-front.jpg"/></a>
+<p><a href = "http://www.ed.ac.uk/information-services/library-museum-gallery/crc/services/copying-and-digitisation/image-licensing"  target="_blank">Image Licensing webpages</a></p>
+<p><a href = "http://www.ed.ac.uk/information-services/library-museum-gallery/crc/services/copying-and-digitisation/permission-to-reproduce-images/takedown-policy" target="_blank">Our Takedown Policy</a></p></div></font>'
+where COLLECTIONID = 'UoE~5~5';
+#######################################
 #    HAIL
 #######################################
 
