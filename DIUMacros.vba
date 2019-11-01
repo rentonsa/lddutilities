@@ -1463,7 +1463,7 @@ Sub CreateXML()
 
 End Sub
 
-Sub Embed()
+Sub Embed_Old()
 MsgBox "Hello DIU!"
 
     Set oWorksheet = ThisWorkbook.Worksheets(1)
@@ -1560,7 +1560,127 @@ MsgBox "Hello DIU!"
     'retval1 = Shell(Chr(34) & embedcmd & Chr(34), vbNormalFocus)
 
 End Sub
+Sub Embed()
+MsgBox "Hello DIU!"
 
+    Set oWorksheet = ThisWorkbook.Worksheets(1)
+    sName = oWorksheet.Name
+    MsgBox oWorksheet.Name
+
+    lCols = oWorksheet.Columns.Count
+
+    lRows = oWorksheet.Rows.Count
+
+    execdir = "T:\diu\Worksheets\"
+
+    dt = Format(CStr(Now), "yy_mm_dd_hh_mm")
+
+    embedcmd = "T:\diu\Worksheets\embed\" & dt & ".bat"
+    MsgBox embedcmd
+
+    Open embedcmd For Output Lock Write As #1
+    Print #1, "cd /D T: > " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & "connection.txt" & Chr(34) & " 2>&1"
+    Print #1, "cd " & Chr(34) & "T:\diu\Worksheets\exiv2" & Chr(34) & " >> " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & "connection.txt" & Chr(34) & " 2>>&1"
+    Print #1, "echo " & Chr(34) & "directory is: " & Chr(34) & "%cd% >> " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & "connection.txt" & Chr(34) & " 2>>&1"
+
+    For i = 4 To lRows
+        If Cells(i, 32) = "R" Then
+            Cells(i, 42).Value = ""
+            Cells(i, 43).Value = ""
+            folder = Left(Cells(i, 8), 4) & "000-" & Left(Cells(i, 8), 4) & "999\"
+            imageno = Left(Cells(i, 8), 7)
+
+            Select Case Cells(i, 10)
+                Case "UoE-Y"
+                    copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Copyright The University of Edinburgh. Free use."
+                Case "UoE-N"
+                    copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Copyright The University of Edinburgh. Not for Public Access."
+                Case "Orphan"
+                    copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Copyright unknown, orphan work."
+                Case "UoE&A-Y"
+                    copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Copyright in the original currently rests with the creator, their estate, heirs or assignees. Permission has been granted for specific use by the University of Edinburgh."
+                Case "UoE&A-N"
+                    copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Copyright in the original currently rests with the creator, their estate, heirs or assignees. Permission has not been granted for  use by the University of Edinburgh (other than those deemed 'Fair Dealing such as educational, personal and non commercial research - unless otherwise stated)."
+                Case "DataP"
+                    copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Copyright in the original may be University of Edinburgh or rest elsewhere. Data Protection restrictions."
+                Case "Loan"
+                    copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Copyright in the original currently rests with the creator, their estate, heirs or assignees. Permission has not been granted for  use by the University of Edinburgh (other than those deemed 'Fair Dealing such as educational, personal and non commercial research - unless otherwise stated)."
+                Case "OC"
+                    copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Out of Copyright."
+                Case "LHSA"
+                    copyrightstring = "Copyright and Data Protection Restrictions. Not for Public Access."
+                Case Else
+                    copyrightstring = "No copyright information available."
+            End Select
+
+            titl = specialChars("Title: " & Cells(i, 13) & "; Author: " & Cells(i, 16) & "; Page No: " & Cells(i, 17) & "; Shelfmark: " & Cells(i, 12) & "; Date: " & Cells(i, 14))
+            titl = Replace(titl, Chr(10), "...")
+            desc = specialChars("Collection: " & Cells(i, 22) & "; Persons: " & Cells(i, 23) & "; Event: " & Cells(i, 25) & "; Place: " & Cells(i, 20) & "; Category: " & Cells(i, 19) & "; Description: " & Cells(i, 21))
+            desc = Replace(desc, Chr(10), "...")
+            city = "Edinburgh"
+            pcde = "EH8 9LJ"
+            exAd = "Centre for Research Collections, The University of Edinburgh, George Square"
+            ctr = "UK"
+            tel = "0131 650 8379"
+            eml = "is-crc@ed.ac.uk"
+            diu = "Digital Imaging Unit"
+            URL = "http://www.lib.ed.ac.uk/resources/collections/crc/index.html"
+
+            'New code to try to handle UTF-8 in embedded data
+            Dim fcmd As Object
+            Set fcmd = CreateObject("ADODB.Stream")
+
+            'Need a second object so we can get rid of the BOM character
+            Dim fcmdb As Object
+            Set fcmdb = CreateObject("ADODB.Stream")
+
+            'Set file object properties
+            fcmd.Type = 2
+            fcmd.Charset = "utf-8"
+            fcmd.Open
+
+            fcmdb.Type = 1
+            fcmdb.Mode = 3
+            fcmdb.Open
+
+            'Declare final file names
+
+            commands = "T:\diu\Worksheets\commands\" & imageno & ".txt"
+
+            fcmd.WriteText "set Iptc.Application2.Headline String " & Chr(34) & imageno & Chr(34) & vbNewLine
+            fcmd.WriteText "set Iptc.Application2.Copyright String " & Chr(34) & copyrightstring & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.dc.creator XmpSeq " & Chr(34) & diu & Chr(34) & vbNewLine
+            fcmd.WriteText "set Iptc.Application2.Caption String " & Chr(34) & desc & Chr(34) & vbNewLine
+            fcmd.WriteText "set Iptc.Application2.ObjectName String " & Chr(34) & titl & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrCity XmpText " & Chr(34) & city & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrPcode XmpText " & Chr(34) & pcde & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrExtadr XmpText " & Chr(34) & exAd & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrCtry XmpText " & Chr(34) & ctr & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiTelWork XmpText " & Chr(34) & tel & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiEmailWork XmpText " & Chr(34) & eml & Chr(34) & vbNewLine
+            fcmd.WriteText "set Iptc.Application2.Headline String " & Chr(34) & imageno & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiUrlWork XmpText " & Chr(34) & URL & vbNewLine
+
+            fcmd.Position = 3
+            fcmd.CopyTo fcmdb
+            fcmd.Flush
+            fcmd.Close
+            fcmdb.SaveToFile commands, 2
+            fcmdb.Close
+
+            Print #1, "exiv2 -m" & commands & " " & Chr(34) & "T:\diu\Crops\" & folder & "Process\" & imageno & "*.tif" & Chr(34) & " > " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & ".txt" & Chr(34) & " 2>>&1"
+
+            Cells(i, 32) = "C"
+
+        End If
+
+    Next
+    Close #1
+    shellstring = Chr(34) & embedcmd & Chr(34)
+    Call Shell("cmd.exe /S /C " & shellstring, vbNormalFocus)
+    'retval1 = Shell(Chr(34) & embedcmd & Chr(34), vbNormalFocus)
+
+End Sub
 
 Sub Error_check()
 
@@ -1658,4 +1778,5 @@ MsgBox "Hello!"
     'retval1 = Shell(Chr(34) & copybackcmd & Chr(34), vbNormalFocus)
 
 End Sub
+
 
