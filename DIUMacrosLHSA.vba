@@ -5,7 +5,7 @@ Function specialChars(ByVal textValue As String) As String
 End Function
 
 Sub CreateXML()
-    MsgBox "Howdy LHSA! Nice to see ya!"
+    MsgBox "Howdy LHSA!"
 
     'Set worksheet- there is only one.
     Set oWorksheet = ThisWorkbook.Worksheets(1)
@@ -440,7 +440,7 @@ Sub CreateXML()
                         flhs.WriteText dataLine & Chr(10)
                         flhs.WriteText recordCloser
                         lhsarray(lhscount) = Cells(i, 8) & " ; " & Cells(i, 11)
-                        lhscount = walcount + 1
+                        lhscount = lhscount + 1
                     End If
 
                     Cells(i, 40) = "V"
@@ -483,74 +483,7 @@ Sub CreateXML()
 
 End Sub
 
-
-Sub Embed()
-MsgBox "Hello LHSA!"
-
-    Set oWorksheet = ThisWorkbook.Worksheets(1)
-    sName = oWorksheet.Name
-    MsgBox oWorksheet.Name
-
-    lCols = oWorksheet.Columns.Count
-
-    lRows = oWorksheet.Rows.Count
-
-    execdir = "T:\lhsa-images\Worksheets\"
-    MsgBox execdir
-    For i = 4 To lRows
-        If Cells(i, 32) = "R" Then
-            folder = Left(Cells(i, 8), 4) & "000-" & Left(Cells(i, 8), 4) & "999\"
-            imageNo = Left(Cells(i, 8), 7)
-            embedcmd = "T:\lhsa-images\Worksheets\embed\" & imageNo & ".bat"
-            Open embedcmd For Output Lock Write As #1
-            Select Case Cells(i, 10)
-                Case "LHSA-Y"
-                    copyrightstring = "Copyright Lothian Health Services Archive. Please contact for permissions and further information."
-                Case Else
-                    copyrightstring = "No copyright information available."
-            End Select
-
-            titleString = "Title: " & Cells(i, 13) & "; Author: " & Cells(i, 16) & "; Page No: " & Cells(i, 17) & "; Shelfmark: " & Cells(i, 12) & "; Date: " & Cells(i, 14)
-            descString = "Collection: " & Cells(i, 22) & "; Persons: " & Cells(i, 23) & "; Event: " & Cells(i, 25) & "; Place: " & Cells(i, 20) & "; Category: " & Cells(i, 19) & "; Description: " & Cells(i, 21)
-            city = "Edinburgh"
-            postcode = "EH8 9LJ"
-            extrAdr = "Lothian Health Services Archive, Centre for Research Collections, Edinburgh University Library, George Square"
-            country = "UK"
-            tel = "0131 6511 720"
-            Email = "is-crc@ed.ac.uk"
-            diu = "Digital Imaging Unit"
-            URL = "www.lhsa.lib.ed.ac.uk"
-
-            Print #1, "cd /D T: > " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>&1"
-            Print #1, "cd " & Chr(34) & "T:\lhsa-images\Worksheets\exiv2" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "echo " & Chr(34) & "directory is: " & Chr(34) & "%cd% >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Iptc.Application2.Headline String " & imageNo & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Iptc.Application2.Copyright String " & copyrightstring & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Xmp.dc.creator XmpSeq " & diu & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Iptc.Application2.Caption String " & descString & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Iptc.Application2.ObjectName String " & titleString & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrCity XmpText " & city & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrPcode XmpText " & postcode & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrExtadr XmpText  " & extrAdr & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrCtry XmpText " & country & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiTelWork XmpText " & tel & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiEmailWork XmpText " & Email & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-            Print #1, "exiv2 -M " & Chr(34) & "set  Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiUrlWork XmpText " & URL & Chr(34) & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & ".txt" & Chr(34) & " 2>>&1"
-
-            Close #1
-
-            retval1 = Shell(Chr(34) & embedcmd & Chr(34), vbNormalFocus)
-
-            Cells(i, 32) = "E"
-
-        End If
-    Next
-
-
-End Sub
-
-
-Sub Embed()
+Sub Embed_Old()
 MsgBox "Hello!"
 
     Set oWorksheet = ThisWorkbook.Worksheets(1)
@@ -568,14 +501,14 @@ MsgBox "Hello!"
     embedcmd = "T:\lhsa-images\Worksheets\embed\" & dt & ".bat"
 
     Open embedcmd For Output Lock Write As #1
-    Print #1, "cd /D T: > " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & "connection.txt" & Chr(34) & " 2>&1"
-    Print #1, "cd " & Chr(34) & "T:\lhsa-images\Worksheets\exiv2" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & "connection.txt" & Chr(34) & " 2>>&1"
-    Print #1, "echo " & Chr(34) & "directory is: " & Chr(34) & "%cd% >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageNo & "connection.txt" & Chr(34) & " 2>>&1"
+    Print #1, "cd /D T: > " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageno & "connection.txt" & Chr(34) & " 2>&1"
+    Print #1, "cd " & Chr(34) & "T:\lhsa-images\Worksheets\exiv2" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageno & "connection.txt" & Chr(34) & " 2>>&1"
+    Print #1, "echo " & Chr(34) & "directory is: " & Chr(34) & "%cd% >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageno & "connection.txt" & Chr(34) & " 2>>&1"
 
     For i = 5 To lRows
         If Cells(i, 32) = "R" Then
             folder = Left(Cells(i, 8), 4) & "000-" & Left(Cells(i, 8), 4) & "999\"
-            imageNo = Left(Cells(i, 8), 7)
+            imageno = Left(Cells(i, 8), 7)
 
             Select Case Cells(i, 10)
                 Case "LHSA-Y"
@@ -614,7 +547,7 @@ MsgBox "Hello!"
             Print #2, "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiUrlWork XmpText " & Chr(34) & URL & Chr(34)
 
             Close #2
-            Print #1, "exiv2 -m" & commands & " " & Chr(34) & "T:\diu\Crops\" & folder & "Process\" & imageno & "m.tif" & Chr(34) & " >> " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & ".txt" & Chr(34) & " 2>>&1"
+            Print #1, "exiv2 -m " & commands & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageno & "m.tif" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageno & ".txt" & Chr(34) & " 2>>&1"
 
             Cells(i, 32) = "E"
 
@@ -640,23 +573,188 @@ MsgBox "Hello LHSA!"
     lRows = oWorksheet.Rows.Count
 
     execdir = "T:\lhsa-images\Worksheets\"
-    dt = Format(CStr(Now), "yyy_mm_dd_hh_mm")
-    copybackcmd = "T:\lhsa-images\Worksheets\copyback\" & dt & ".bat"
-    Open copybackcmd For Output Lock Write As #1
-    For i = 5 To lRows
+    For i = 4 To lRows
         If Cells(i, 32) = "E" Then
             folder = Left(Cells(i, 8), 4) & "000-" & Left(Cells(i, 8), 4) & "999\"
-            imageNo = Left(Cells(i, 8), 7)
-            Print #1, "move T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "m.tif*  T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif"
+            imageno = Left(Cells(i, 8), 7)
+            copybackcmd = "T:\lhsa-images\Worksheets\copyback\" & imageno & ".bat"
+            Open copybackcmd For Output Lock Write As #1
+
+            Print #1, "move T:\lhsa-images\Crops\" & folder & "Process\" & imageno & "m.tif*  T:\lhsa-images\Crops\" & folder & "Process\" & imageno & "c.tif"
+            'Print #1, "copy T:\lhsa-images\Crops\" & folder & "Process\" & imageNo & "c.tif*  T:\lhsa-images\Crops\" & folder & imageNo & "c.tif"
+
+            Close #1
+
+            retval1 = Shell(Chr(34) & copybackcmd & Chr(34), vbNormalFocus)
+
             Cells(i, 32) = "X"
 
         End If
     Next
 
-    Close #1
 
-    shellstring = Chr(34) & copybackcmd & Chr(34)
+End Sub
+
+Sub Embed()
+MsgBox "Hello LHSA!"
+
+    Set oWorksheet = ThisWorkbook.Worksheets(1)
+    sName = oWorksheet.Name
+    MsgBox oWorksheet.Name
+
+    lCols = oWorksheet.Columns.Count
+
+    lRows = oWorksheet.Rows.Count
+
+    execdir = "T:\lhsa-images\Worksheets\"
+
+    dt = Format(CStr(Now), "yy_mm_dd_hh_mm")
+
+    embedcmd = "T:\lhsa-images\Worksheets\embed\" & dt & ".bat"
+    MsgBox embedcmd
+
+    Open embedcmd For Output Lock Write As #1
+    Print #1, "cd /D T: > " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageno & "connection.txt" & Chr(34) & " 2>&1"
+    Print #1, "cd " & Chr(34) & "T:\lhsa-images\Worksheets\exiv2" & Chr(34) & " >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageno & "connection.txt" & Chr(34) & " 2>>&1"
+    Print #1, "echo " & Chr(34) & "directory is: " & Chr(34) & "%cd% >> " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageno & "connection.txt" & Chr(34) & " 2>>&1"
+
+    For i = 4 To lRows
+        If Cells(i, 32) = "R" Then
+            Cells(i, 42).Value = ""
+            Cells(i, 43).Value = ""
+            folder = Left(Cells(i, 8), 4) & "000-" & Left(Cells(i, 8), 4) & "999\"
+            imageno = Left(Cells(i, 8), 7)
+
+            Select Case Cells(i, 10)
+                Case "LHSA-Y"
+                    copyrightstring = "Copyright Lothian Health Services Archive. Please contact for permissions and further information."
+                Case Else
+                    copyrightstring = "No copyright information available."
+            End Select
+
+            titl = "Title: " & Cells(i, 13) & "; Author: " & Cells(i, 16) & "; Page No: " & Cells(i, 17) & "; Shelfmark: " & Cells(i, 12) & "; Date: " & Cells(i, 14)
+            desc = "Collection: " & Cells(i, 22) & "; Persons: " & Cells(i, 23) & "; Event: " & Cells(i, 25) & "; Place: " & Cells(i, 20) & "; Category: " & Cells(i, 19) & "; Description: " & Cells(i, 21)
+            exAd = "Lothian Health Services Archive, Centre for Research Collections, Edinburgh University Library, George Square"
+            city = "Edinburgh"
+            pcde = "EH8 9LJ"
+            ctr = "UK"
+            tel = "0131 650 8379"
+            URL = "www.lhsa.lib.ed.ac.uk"
+            eml = "is-crc@ed.ac.uk"
+            diu = "Digital Imaging Unit"
+
+            'New code to try to handle UTF-8 in embedded data
+            Dim fcmd As Object
+            Set fcmd = CreateObject("ADODB.Stream")
+
+            'Need a second object so we can get rid of the BOM character
+            Dim fcmdb As Object
+            Set fcmdb = CreateObject("ADODB.Stream")
+
+            'Set file object properties
+            fcmd.Type = 2
+            fcmd.Charset = "utf-8"
+            fcmd.Open
+
+            fcmdb.Type = 1
+            fcmdb.Mode = 3
+            fcmdb.Open
+
+            'Declare final file names
+
+            commands = "T:\lhsa-images\Worksheets\commands\" & imageno & ".txt"
+
+            fcmd.WriteText "set Iptc.Application2.Headline String " & Chr(34) & imageno & Chr(34) & vbNewLine
+            fcmd.WriteText "set Iptc.Application2.Copyright String " & Chr(34) & copyrightstring & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.dc.creator XmpSeq " & Chr(34) & diu & Chr(34) & vbNewLine
+            fcmd.WriteText "set Iptc.Application2.Caption String " & Chr(34) & desc & Chr(34) & vbNewLine
+            fcmd.WriteText "set Iptc.Application2.ObjectName String " & Chr(34) & titl & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrCity XmpText " & Chr(34) & city & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrPcode XmpText " & Chr(34) & pcde & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrExtadr XmpText " & Chr(34) & exAd & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrCtry XmpText " & Chr(34) & ctr & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiTelWork XmpText " & Chr(34) & tel & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiEmailWork XmpText " & Chr(34) & eml & Chr(34) & vbNewLine
+            fcmd.WriteText "set Iptc.Application2.Headline String " & Chr(34) & imageno & Chr(34) & vbNewLine
+            fcmd.WriteText "set Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiUrlWork XmpText " & Chr(34) & URL & vbNewLine
+
+            fcmd.Position = 3
+            fcmd.CopyTo fcmdb
+            fcmd.Flush
+            fcmd.Close
+            fcmdb.SaveToFile commands, 2
+            fcmdb.Close
+
+            Print #1, "exiv2 -m" & commands & " " & Chr(34) & "T:\lhsa-images\Crops\" & folder & "Process\" & imageno & "*.tif" & Chr(34) & " > " & Chr(34) & "T:\lhsa-images\Worksheets\error\" & imageno & ".txt" & Chr(34) & " 2>>&1"
+
+            Cells(i, 32) = "C"
+
+        End If
+
+    Next
+    Close #1
+    shellstring = Chr(34) & embedcmd & Chr(34)
     Call Shell("cmd.exe /S /C " & shellstring, vbNormalFocus)
-    'retval1 = Shell(Chr(34) & copybackcmd & Chr(34), vbNormalFocus)
+    'retval1 = Shell(Chr(34) & embedcmd & Chr(34), vbNormalFocus)
+
+End Sub
+
+Sub Error_check()
+
+    MsgBox "Hello LHSA!"
+
+    Set oWorksheet = ThisWorkbook.Worksheets(1)
+    sName = oWorksheet.Name
+    MsgBox oWorksheet.Name
+
+    lCols = oWorksheet.Columns.Count
+
+    lRows = oWorksheet.Rows.Count
+
+    execdir = "T:\lhsa-images\Worksheets\"
+
+
+    For i = 4 To lRows
+        If Cells(i, 32) = "C" Then
+            imageno = Left(Cells(i, 8), 7)
+            error_file = execdir & "error\" & imageno & ".txt"
+            cmd_file = execdir & "commands\" & imageno & ".txt"
+            my_file = FreeFile()
+
+
+            j = 1
+            If FileLen(error_file) = 0 Then
+                Cells(i, 32) = "E"
+                rmerror = "del " & error_file
+                Call Shell("cmd.exe /S /C " & rmerror, vbNormalFocus)
+                rmcmd = "del " & error_file
+                Call Shell("cmd.exe /S /C " & rmcmd, vbNormalFocus)
+            Else
+                Open error_file For Input As my_file
+                While j = 1
+                    Line Input #my_file, text_line
+                    Cells(i, 32).Value = "R"
+                    'Case statement to change the value to something readable
+                    If InStr(test_line, "Failed to open") > 0 Then
+                        Action = "MOVE FILE INTO PROCESS AND RETRY EMBED"
+                    Else
+                        If InStr(test_line, "Invalid command") > 0 Then
+                            Action = "CHECK MD FOR UNUSUAL FORMATTING AND RETRY EMBED"
+                        Else
+                            Action = "RETRY EMBED"
+                        End If
+                    End If
+
+                    Cells(i, 42).Value = Action
+                    Cells(i, 43).Value = text_line
+                    j = i + 1
+                Wend
+            End If
+
+
+        End If
+
+    Next
+    Close #1
 
 End Sub
