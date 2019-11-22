@@ -305,8 +305,8 @@ Sub CreateXML()
     'Process all rows
     For i = 5 To lRows
 
-
-        processed = Cells(i, 40)
+        'SR changing this from (i,40) - 2019/11/22
+        processed = Cells(i, 41)
         Dim personArray() As String
         Dim categoryArray() As String
         Dim creatorArray() As String
@@ -561,8 +561,8 @@ Sub CreateXML()
                     reproLinkId = fields & "repro_link_id" & fieldcvalues & workString & "c" & valueefielde
                     workRecordId = fields & "work_record_id" & fieldcvalues & workString & valueefielde
                     reproIdNumber = entitys & "repro_id_number" & entitycfieldst & "repro_id_number" & fieldcvalues & workString & "c" & valueefieldeentitye
-
-
+                    
+    
                     Subset = entitys & "subset" & entitycfieldst & "work_subset" & fieldcvalues & rel_string & valueefielde
                     relatedWorkTitle = entitys & "related_work" & entitycfieldst & "work_source" & fieldcvalues & rel_string & valueefielde
 
@@ -580,9 +580,16 @@ Sub CreateXML()
                     End If
 
                     If Cells(i, 26) = "" Then
-                        catalogueNumber = entitye
+                        catalogueNumber = ""
                     Else
-                        catalogueNumber = fields & "work_catalogue_number" & fieldcvalues & specialChars(Cells(i, 26)) & valueefieldeentitye
+                        catalogueNumber = fields & "work_catalogue_number" & fieldcvalues & specialChars(Cells(i, 26)) & valueefielde
+                    End If
+                    
+                    'SR add Dig Obj Ref - 2019/11/22
+                    If Cells(i, 27) = "" Then
+                        digobjref = entitye
+                    Else
+                        digobjref = fields & "digital_object_reference" & fieldcvalues & specialChars(Cells(i, 27)) & valueefieldeentitye
                     End If
 
                     repository = entitys & "repository" & entitycfieldst & "work_repository" & fieldcvalues & Cells(i, 22) & valueefieldeentitye
@@ -606,11 +613,11 @@ Sub CreateXML()
                     Else
                         subjectEvent = entitys & "subject" & entitycfieldst & "work_subject_event" & fieldcvalues & specialChars(Cells(i, 25)) & valueefieldeentitye
                     End If
-
-                    If Cells(i, 27) = "N/A" Or Cells(i, 27) = "Unknown" Or Cells(i, 27) = "-" Or Cells(i, 27) = "" Then
+                    'SR changing this from (i,27) - 2019/11/22
+                    If Cells(i, 28) = "N/A" Or Cells(i, 28) = "Unknown" Or Cells(i, 28) = "-" Or Cells(i, 28) = "" Then
                         reproNotes = entitye
                     Else
-                        reproNotes = fields & "repro_notes" & fieldcvalues & specialChars(Cells(i, 27)) & valueefieldeentitye
+                        reproNotes = fields & "repro_notes" & fieldcvalues & specialChars(Cells(i, 28)) & valueefieldeentitye
                     End If
 
                     If Cells(i, 21) = "N/A" Or Cells(i, 21) = "Unknown" Or Cells(i, 21) = "-" Or Cells(i, 21) = "" Then
@@ -774,7 +781,7 @@ Sub CreateXML()
                     End If
 
                     'Build XML file
-                    dataLine1 = workRecordId & licenceString & shelfmark & holdingInstitution & catalogueNumber & allTitles & Subset & subsetIndex & sequence & allCreators & dateString & Description & allProdPlaces & repository & allSubjectPersons & allSubjectPlaces & subjectEvent & allSubjectCats & relatedWorkTitle & relatedWorkVolPageNo & rightsStatement & catalogueEntry
+                    dataLine1 = workRecordId & licenceString & shelfmark & holdingInstitution & catalogueNumber & digobjref & allTitles & Subset & subsetIndex & sequence & allCreators & dateString & Description & allProdPlaces & repository & allSubjectPersons & allSubjectPlaces & subjectEvent & allSubjectCats & relatedWorkTitle & relatedWorkVolPageNo & rightsStatement & catalogueEntry
                     dataLine2 = reproRecordId & reproLinkId & reproFileType & reproNotes & reproTitle & reproCreatorName & reproCreatorRoleDescription & reproRepository & reproIdNumber & reproRightsStatement & reproPublicationStatus
                     dataLine = dataLine1 & dataLine2
 
@@ -991,7 +998,7 @@ Sub CreateXML()
                         walarray(walcount) = Cells(i, 8) & " ; " & Cells(i, 11)
                         walcount = walcount + 1
                     End If
-
+                    
                     If shortcoll = "bla" Then
                         If blacount = 0 Then
                             fbla.WriteText Header & Chr(10)
@@ -1002,8 +1009,8 @@ Sub CreateXML()
                         blaarray(blacount) = Cells(i, 8) & " ; " & Cells(i, 11)
                         blacount = blacount + 1
                     End If
-
-                    Cells(i, 40) = "V"
+                    'SR - changing from (i,40) 2019/11/22
+                    Cells(i, 41) = "V"
 
 
                 End If
@@ -1243,7 +1250,7 @@ Sub CreateXML()
             fwal.Close
             fwalb.Close
          End If
-
+         
          If blacount > 0 Then
             fbla.WriteText "</recordList>"
             fbla.Position = 3
@@ -1255,7 +1262,7 @@ Sub CreateXML()
             fbla.Close
             fblab.Close
          End If
-
+         
          i = 0
 
          If wmmcount > 0 Then
@@ -1436,9 +1443,9 @@ Sub CreateXML()
                 Print #99, maparray(i)
             Next
         End If
-
+        
         i = 0
-
+        
         If walcount > 0 Then
             Print #99, walcoll
             Print #99, "===================="
@@ -1446,9 +1453,9 @@ Sub CreateXML()
                 Print #99, walarray(i)
             Next
         End If
-
+        
         i = 0
-
+        
         If blacount > 0 Then
             Print #99, blacoll
             Print #99, "===================="
@@ -1456,7 +1463,7 @@ Sub CreateXML()
                 Print #99, blaarray(i)
             Next
         End If
-
+        
         Close #99
 
         MsgBox "Ended!"
@@ -1574,7 +1581,7 @@ MsgBox "Hello DIU!"
     execdir = "T:\diu\Worksheets\"
 
     dt = Format(CStr(Now), "yy_mm_dd_hh_mm")
-
+    
     embedcmd = "T:\diu\Worksheets\embed\" & dt & ".bat"
     MsgBox embedcmd
 
@@ -1584,12 +1591,13 @@ MsgBox "Hello DIU!"
     Print #1, "echo " & Chr(34) & "directory is: " & Chr(34) & "%cd% >> " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & "connection.txt" & Chr(34) & " 2>>&1"
 
     For i = 4 To lRows
-        If Cells(i, 32) = "R" Then
-            Cells(i, 42).Value = ""
+        'SR shunting cell values along
+        If Cells(i, 33) = "R" Then
             Cells(i, 43).Value = ""
+            Cells(i, 44).Value = ""
             folder = Left(Cells(i, 8), 4) & "000-" & Left(Cells(i, 8), 4) & "999\"
             imageno = Left(Cells(i, 8), 7)
-
+    
             Select Case Cells(i, 10)
                 Case "UoE-Y"
                     copyrightstring = "Digital Image: Copyright The University of Edinburgh. Original: Copyright The University of Edinburgh. Free use."
@@ -1625,24 +1633,24 @@ MsgBox "Hello DIU!"
             eml = "is-crc@ed.ac.uk"
             diu = "Digital Imaging Unit"
             URL = "http://www.lib.ed.ac.uk/resources/collections/crc/index.html"
-
+            
             'New code to try to handle UTF-8 in embedded data
             Dim fcmd As Object
             Set fcmd = CreateObject("ADODB.Stream")
-
+            
             'Need a second object so we can get rid of the BOM character
             Dim fcmdb As Object
             Set fcmdb = CreateObject("ADODB.Stream")
-
+            
             'Set file object properties
             fcmd.Type = 2
             fcmd.Charset = "utf-8"
             fcmd.Open
-
+            
             fcmdb.Type = 1
             fcmdb.Mode = 3
             fcmdb.Open
-
+            
             'Declare final file names
 
             commands = "T:\diu\Worksheets\commands\" & imageno & ".txt"
@@ -1667,10 +1675,10 @@ MsgBox "Hello DIU!"
             fcmd.Close
             fcmdb.SaveToFile commands, 2
             fcmdb.Close
-
-            Print #1, "exiv2 -m" & commands & " " & Chr(34) & "T:\diu\Crops\" & folder & "Process\" & imageno & "*.tif" & Chr(34) & " > " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & ".txt" & Chr(34) & " 2>>&1"
-
-            Cells(i, 32) = "C"
+            
+            Print #1, "exiv2 -m " & commands & " " & Chr(34) & "T:\diu\Crops\" & folder & "Process\" & imageno & "*.tif" & Chr(34) & " > " & Chr(34) & "T:\diu\Worksheets\error\" & imageno & ".txt" & Chr(34) & " 2>>&1"
+            'SR shunting cell along - 2019/11/22
+            Cells(i, 33) = "C"
 
         End If
 
@@ -1693,21 +1701,23 @@ Sub Error_check()
     lCols = oWorksheet.Columns.Count
 
     lRows = oWorksheet.Rows.Count
-
+    
     execdir = "T:\diu\Worksheets\"
-
+        
 
     For i = 4 To lRows
-        If Cells(i, 32) = "C" Then
+       'SR shunting cell along - 2019/11/22
+        If Cells(i, 33) = "C" Then
             imageno = Left(Cells(i, 8), 7)
             error_file = execdir & "error\" & imageno & ".txt"
             cmd_file = execdir & "commands\" & imageno & ".txt"
             my_file = FreeFile()
-
+            
 
             j = 1
             If FileLen(error_file) = 0 Then
-                Cells(i, 32) = "E"
+            'SR shunting cell along - 2019/11/22
+                Cells(i, 33) = "E"
                 rmerror = "del " & error_file
                 Call Shell("cmd.exe /S /C " & rmerror, vbNormalFocus)
                 rmcmd = "del " & error_file
@@ -1716,7 +1726,8 @@ Sub Error_check()
                 Open error_file For Input As my_file
                 While j = 1
                     Line Input #my_file, text_line
-                    Cells(i, 32).Value = "R"
+                    'SR shunting cell along - 2019/11/22
+                    Cells(i, 33).Value = "R"
                     'Case statement to change the value to something readable
                     If InStr(test_line, "Failed to open") > 0 Then
                         Action = "MOVE FILE INTO PROCESS AND RETRY EMBED"
@@ -1727,9 +1738,9 @@ Sub Error_check()
                             Action = "RETRY EMBED"
                         End If
                     End If
-
-                    Cells(i, 42).Value = Action
-                    Cells(i, 43).Value = text_line
+                    'SR shunting cell along - 2019/11/22
+                    Cells(i, 43).Value = Action
+                    Cells(i, 44).Value = text_line
                     j = i + 1
                 Wend
             End If
@@ -1758,15 +1769,16 @@ MsgBox "Hello!"
     copybackcmd = "T:\diu\Worksheets\copyback\" & dt & ".bat"
     Open copybackcmd For Output Lock Write As #1
     For i = 5 To lRows
-        If Cells(i, 32) = "E" Then
+        'SR shunting cell along - 2019/11/22
+        If Cells(i, 33) = "E" Then
             folder = Left(Cells(i, 8), 4) & "000-" & Left(Cells(i, 8), 4) & "999\"
             imageno = Left(Cells(i, 8), 7)
 
 
             Print #1, "move T:\diu\Crops\" & folder & "Process\" & imageno & "m.tif*  T:\diu\Crops\" & folder & "Process\" & imageno & "c.tif"
             'Print #1, "copy T:\diu\Crops\" & folder & "Process\" & imageNo & "c.tif*  T:\diu\Crops\" & folder & imageNo & "c.tif"
-
-            Cells(i, 32) = "X"
+             'SR shunting cell along - 2019/11/22
+            Cells(i, 33) = "X"
 
         End If
     Next
@@ -1778,5 +1790,3 @@ MsgBox "Hello!"
     'retval1 = Shell(Chr(34) & copybackcmd & Chr(34), vbNormalFocus)
 
 End Sub
-
-
