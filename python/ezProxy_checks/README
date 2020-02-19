@@ -1,0 +1,13 @@
+To use ezproxy_checks, pull down a log from the relevant ezproxy server
+eg logs/ezp202002.log -
+that becomes the variable ezp2.log in the script
+Pull down the sessions log
+eg audit/20200219.txt
+that becomes the variable sessions_ex2.txt in the script
+The summary file is stripped down output from the log JUST FOR THOSE SESSIONS
+
+To use ezproxy_users, pull down the sessions log
+eg audit/20200219.txt
+That becomes the 20200219.txt
+sessions.txt is a list of offensive session IDs
+The summary file is a list of users for the offensive session IDs
